@@ -15,6 +15,7 @@ clap = { version = "4.5.7", features = ["derive", "wrap_help"] }
 derive_more = "0.99.18"
 indicatif = "0.17.8"
 itertools = "0.13.0"
+owo-colors = "4.0.0"
 quickcheck = "1.0.3"
 quickcheck_macros = "1.0.0"
 regex = { version = "1.10.5", features = ["logging"] }
