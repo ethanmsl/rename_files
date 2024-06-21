@@ -7,6 +7,7 @@
 
 use clap::Parser;
 use itertools::Itertools;
+use owo_colors::OwoColorize;
 use regex::Regex;
 use rename_files::{error::Result, logging::tracing_subscribe_boilerplate};
 use tracing::{error, info, warn};
@@ -68,8 +69,8 @@ fn main() -> Result<()> {
             continue;
         };
 
-        println!("for regex '{}' a match was found in entry {}", &args.regex, &entry);
-        println!("The captures are: {:?}", &captures);
+        println!("for regex '{}' a match was found in entry {}", &args.regex.green(), &entry.purple());
+        println!("The captures are: {:?}", &captures.blue());
     }
 
     // if --change-yes
