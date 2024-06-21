@@ -9,6 +9,7 @@ use clap::Parser;
 use regex::Regex;
 use rename_files::{error::Result, logging::tracing_subscribe_boilerplate};
 use tracing::{error, info, warn};
+use walkdir::WalkDir;
 
 /// Struct info
 #[derive(Parser, Debug)]
@@ -32,17 +33,26 @@ fn main() -> Result<()> {
     // Get Args
     let args = Args::parse();
     tracing::info!("Args: {:?}", args);
-
-    //  -- check basic regex functionality --
-    let hay = "Hi there fellow humulons!";
-    tracing::info!("Haystack: {}", hay);
+    // translate to regex
     let re = Regex::new(&args.regex)?;
 
-    let Some(captures) = re.captures(hay) else {
-        println!("no match!");
-        return Err("No match found")?;
-    };
-    println!("The caps are: {:?}", &captures);
+    // Get Files
+    for entry in WalkDir::new(".") {
+        let Ok(entry) = entry else {
+            tracing::error!("Entry that caused a walkdir error: {:?}", entry);
+            continue;
+        };
+        let Some(entry) = entry.path().to_str() else {
+            tracing::error!("Entry that caused a to_string error: {:?}", entry);
+            continue;
+        };
+        let Some(captures) = re.captures(entry) else {
+            tracing::debug!("No Match for Entry: {:?}", entry);
+            continue;
+        };
+        tracing::info!("Entry: {:?}", entry);
+        tracing::info!("The caps are: {:?}", &captures);
+    }
 
     // Validate in Regex
     // Validate out Regex
