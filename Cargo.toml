@@ -1,0 +1,23 @@
+[package]
+name = "rename_files"
+version = "0.1.0"
+edition = "2021"
+
+[lints.rust]
+unsafe_code = { level = "forbid", priority = -1 }
+unused = "allow"
+dead_code = "allow"
+
+[dependencies]
+assert_fs = "1.1.1"
+chrono = "0.4.38"
+clap = { version = "4.5.7", features = ["derive", "wrap_help"] }
+derive_more = "0.99.18"
+indicatif = "0.17.8"
+itertools = "0.13.0"
+quickcheck = "1.0.3"
+quickcheck_macros = "1.0.0"
+regex = { version = "1.10.5", features = ["logging"] }
+tracing = "0.1.40"
+tracing-subscriber = { version = "0.3.18", features = ["chrono", "env-filter"] }
+walkdir = "2.5.0"

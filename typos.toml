@@ -1,0 +1,5 @@
+# Settings for typos-cli tool
+
+[files]
+extend-exclude = ["data/*"]
+
