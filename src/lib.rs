@@ -1,3 +1,5 @@
+//! Library Code.
+
 /// Very early error type that can flow into standard error handling with type coercions.
 pub mod error {
     pub type Result<T> = core::result::Result<T, Error>;
