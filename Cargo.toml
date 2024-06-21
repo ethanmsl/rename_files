@@ -9,16 +9,16 @@ unused = "allow"
 dead_code = "allow"
 
 [dependencies]
-assert_fs = "1.1.1"
-chrono = "0.4.38"
-clap = { version = "4.5.7", features = ["derive", "wrap_help"] }
-derive_more = "0.99.18"
-indicatif = "0.17.8"
-itertools = "0.13.0"
-owo-colors = "4.0.0"
-quickcheck = "1.0.3"
-quickcheck_macros = "1.0.0"
-regex = { version = "1.10.5", features = ["logging"] }
-tracing = "0.1.40"
-tracing-subscriber = { version = "0.3.18", features = ["chrono", "env-filter"] }
-walkdir = "2.5.0"
+assert_fs = "1"
+chrono = "0.4"
+clap = { version = "4", features = ["derive", "wrap_help"] }
+derive_more = "0.99"
+indicatif = "0.17"
+itertools = "0.13"
+owo-colors = "4"
+quickcheck = "1"
+quickcheck_macros = "1"
+regex = { version = "1", features = ["logging"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["chrono", "env-filter"] }
+walkdir = "2"
