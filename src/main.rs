@@ -27,7 +27,7 @@ const RE_SYNTAX_WARN: &str = r"(\$\d)[^\d\$\s]+";
 /// Files are only renamed if a `--rep(lace)` argument is provided
 /// AND `--test-run` or `-t` is not provided.  
 #[derive(Parser, Debug)]
-#[command(author, version, about, long_about = None)]
+#[command(version, about, long_about)]
 struct Args {
     /// (Rust flavor) regex to search filenames with.
     regex: String,

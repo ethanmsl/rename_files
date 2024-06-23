@@ -1,8 +1,8 @@
 [package]
 name = "rename_files"
-version = "0.1.0"
+version = "0.1.1"
+authors = ["Ethan Skowronski-Lutz"]
 edition = "2021"
-
 [lints.rust]
 unsafe_code = { level = "forbid" }
 
