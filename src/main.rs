@@ -2,7 +2,8 @@
 //!
 //! # Example:
 //! ```bash
-//! clear; el; carr -- --regex '(C|c)argo.*(\..*)' --replacement '$1ogra$2'
+//! clear; el; carr -- '(C|c)argo.*(\..*)' --rep '$1ogra$2' --test-run
+//! clear; el; carr -- '(C|c)argo.*(\..*)' --rep '${1}ogra$2' --test-run
 //! ```
 
 // Notes:
@@ -21,22 +22,25 @@ use walkdir::WalkDir;
 //      `${1}abc` is proper syntax
 const RE_SYNTAX_WARN: &str = r"(\$\d)[^\d\$\s]+";
 
-/// CLI input arguments
+/// Filename Find and (optionally) Replace using Rust Regex Syntax.  
+///
+/// Files are only renamed if a `--rep(lace)` argument is provided
+/// AND `--test-run` or `-t` is not provided.  
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Args {
-    /// like element to search for in subdomain names
+    /// (Rust flavor) regex to search filenames with.
     regex: String,
 
-    /// like element to search for in subdomain names
+    /// Replacement string for regex matches. Use `$1`, `${1}` to reference capture groups.
     #[arg(long = "rep")]
     replacement: Option<String>,
 
-    /// recurse into child directories
+    /// Recurse into child directories.
     #[arg(short, long)]
     recurse: bool,
 
-    /// indicate transformations that would occur
+    /// Show replacements that would occur, but don't rename files.
     #[arg(short, long)]
     test_run: bool,
 }
