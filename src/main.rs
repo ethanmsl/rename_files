@@ -23,7 +23,7 @@ use walkdir::WalkDir;
 // regex for checking a reference number followed by other chars
 // e.g. `$1abc` will be parsed as ($1abc) NOT ($1)(abc)
 //      `${1}abc` is proper syntax
-const RE_SYNTAX_WARN: &str = r"(\$\d)[^\d\$]+";
+const RE_SYNTAX_WARN: &str = r"(\$\d)[^\d\$\s]+";
 
 /// CLI input arguments
 #[derive(Parser, Debug)]
@@ -58,7 +58,7 @@ fn main() -> Result<()> {
     // translate to regex
     let re = Regex::new(&args.regex)?;
 
-    // Flagging unintended syntax
+    // Guard: Flagging unintended syntax
     if let Some(rep_arg) = &args.replacement {
         let re_check = Regex::new(RE_SYNTAX_WARN).expect("valid, static regex");
         tracing::info!("{:?}", &rep_arg);
@@ -68,9 +68,10 @@ fn main() -> Result<()> {
                                                           cap[1].to_string().blue(),
                                                           cap[0].to_string().red());
                                        });
+        return Err("Ambiguous replacement syntax".into());
     }
 
-    // Recurse?
+    // Set: Recurse?
     let walkable_space = if args.recurse {
         tracing::debug!("Recursable WalkDir");
         WalkDir::new(".").min_depth(1)
@@ -108,8 +109,6 @@ fn main() -> Result<()> {
         }
     }
 
-    // if --change-yes
-    // serially change files, logging each and any errors
     Ok(())
 }
 
