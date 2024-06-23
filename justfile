@@ -30,6 +30,14 @@ init: && deps-ext
     cargo build    
     cargo doc
 
+# Clean, release build, deploy file to `/user/local/bin/`
+[confirm]
+deploy:
+    cargo clean
+    cargo build --release
+    cargo doc --release
+    sudo cp target/release/rename_files /usr/local/bin/rename_files
+
 # Linting, formatting, typo checking, etc.
 check:
     -cargo clippy
