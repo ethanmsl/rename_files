@@ -4,20 +4,18 @@ version = "0.1.0"
 edition = "2021"
 
 [lints.rust]
-unsafe_code = { level = "forbid", priority = -1 }
-unused = "allow"
-dead_code = "allow"
+unsafe_code = { level = "forbid" }
 
 [dependencies]
-assert_fs = "1"
-chrono = "0.4"
+# assert_fs = "1"
+# chrono = "0.4"
 clap = { version = "4", features = ["derive", "wrap_help"] }
-derive_more = "0.99"
-indicatif = "0.17"
-itertools = "0.13"
+# derive_more = "0.99"
+# indicatif = "0.17"
+# itertools = "0.13"
 owo-colors = "4"
-quickcheck = "1"
-quickcheck_macros = "1"
+# quickcheck = "1"
+# quickcheck_macros = "1"
 regex = { version = "1", features = ["logging"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["chrono", "env-filter"] }
