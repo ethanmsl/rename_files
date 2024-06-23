@@ -10,14 +10,10 @@
 // Show files that do and don't match patterns (?)
 // Have limits on what's shown?
 
-use std::fs::rename;
-
 use clap::Parser;
-use itertools::Itertools;
 use owo_colors::OwoColorize;
 use regex::Regex;
 use rename_files::{error::Result, logging::tracing_subscribe_boilerplate};
-use tracing::{error, info, warn};
 use walkdir::WalkDir;
 
 // regex for checking a reference number followed by other chars
@@ -30,11 +26,10 @@ const RE_SYNTAX_WARN: &str = r"(\$\d)[^\d\$\s]+";
 #[command(author, version, about, long_about = None)]
 struct Args {
     /// like element to search for in subdomain names
-    #[arg(long)]
     regex: String,
 
     /// like element to search for in subdomain names
-    #[arg(long)]
+    #[arg(long = "rep")]
     replacement: Option<String>,
 
     /// recurse into child directories
@@ -49,9 +44,7 @@ struct Args {
 fn main() -> Result<()> {
     // Setup logging
     tracing_subscribe_boilerplate("info");
-    tracing::info!("Starting up!");
-
-    let boop = WalkDir::new(".").min_depth(1).into_iter().filter_entry(|e| !is_hidden(e));
+    tracing::trace!("Starting up!");
 
     // Get Args
     let args = Args::parse();
@@ -61,14 +54,12 @@ fn main() -> Result<()> {
     // Guard: Flagging unintended syntax
     if let Some(rep_arg) = &args.replacement {
         let re_check = Regex::new(RE_SYNTAX_WARN).expect("valid, static regex");
-        tracing::info!("{:?}", &rep_arg);
-        tracing::info!("{:?}", &re_check);
-        re_check.captures_iter(rep_arg).for_each(|cap| {
-                                           tracing::warn!("\nWarning: capture reference `{}` is being read as `{}`\nIf this is not intended use: `${{_}}...` instead.",
-                                                          cap[1].to_string().blue(),
-                                                          cap[0].to_string().red());
-                                       });
-        return Err("Ambiguous replacement syntax".into());
+        if let Some(cap) = re_check.captures(rep_arg) {
+            tracing::warn!("\nWarning:\ncapture reference `{}` is being read as `{}`\nIf this is not intended use: `${{_}}...` instead.",
+                           cap[1].to_string().blue(),
+                           cap[0].to_string().red());
+            return Err("Ambiguous replacement syntax".into());
+        }
     }
 
     // Set: Recurse?
@@ -94,18 +85,25 @@ fn main() -> Result<()> {
         };
         // lightGuard: no regex match
         let Some(captures) = re.captures(entry) else {
-            tracing::debug!("No Match for Entry: {:?}", entry);
+            tracing::trace!("No Match for Entry: {:?}", entry);
             continue;
         };
 
-        println!("for regex '{}' a match was found in entry {}", &args.regex.green(), &entry.purple());
-        println!("The captures are: {:?}", &captures.blue());
+        tracing::debug!("for regex '{}' a match was found in entry {}", &args.regex.green(), &entry.purple());
+        tracing::debug!("The captures are: {:?}", &captures.blue());
 
         if let Some(rep) = &args.replacement {
-            tracing::warn!(entry);
-            tracing::warn!(rep);
             let new_name = re.replace(entry, rep);
-            println!("The new name is: {}", &new_name.red());
+            println!("Mapping {} ~~> {}", &entry.black().bold().on_green(), &new_name.red().bold().on_blue());
+
+            if !args.test_run {
+                std::fs::rename(entry, new_name.as_ref())?;
+                println!("...file renamed\n");
+            } else {
+                println!("'--test-run' active, no files renamed\n");
+            }
+        } else {
+            println!("Match found: {}", &entry.black().bold().on_green());
         }
     }
 
@@ -115,6 +113,7 @@ fn main() -> Result<()> {
 /// Checks for a literal `.` prefix on a entry
 ///
 /// # Note: This will trigger on the `.` used to indicate the 'local' directory
+#[allow(unused)]
 fn is_hidden(entry: &walkdir::DirEntry) -> bool {
     let is_hidden = entry.file_name().to_str().map(|s| s.starts_with('.')).unwrap_or(false);
     if is_hidden {
