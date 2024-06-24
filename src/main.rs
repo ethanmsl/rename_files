@@ -12,15 +12,11 @@
 // Have limits on what's shown?
 
 use clap::Parser;
+use error::Result;
+use logging::tracing_subscribe_boilerplate;
 use owo_colors::OwoColorize;
 use regex::Regex;
-use rename_files::{error::Result, logging::tracing_subscribe_boilerplate};
 use walkdir::WalkDir;
-
-// regex for checking a reference number followed by other chars
-// e.g. `$1abc` will be parsed as ($1abc) NOT ($1)(abc)
-//      `${1}abc` is proper syntax
-const RE_SYNTAX_WARN: &str = r"(\$\d)[^\d\$\s]+";
 
 /// Filename Find and (optionally) Replace using Rust Regex Syntax.  
 ///
@@ -46,27 +42,15 @@ struct Args {
 }
 
 fn main() -> Result<()> {
-    // Setup logging
     tracing_subscribe_boilerplate("info");
-    tracing::trace!("Starting up!");
 
-    // Get Args
     let args = Args::parse();
-    // translate to regex
     let re = Regex::new(&args.regex)?;
 
-    // Guard: Flagging unintended syntax
-    if let Some(rep_arg) = &args.replacement {
-        let re_check = Regex::new(RE_SYNTAX_WARN).expect("valid, static regex");
-        if let Some(cap) = re_check.captures(rep_arg) {
-            tracing::warn!("\nWarning:\ncapture reference `{}` is being read as `{}`\nIf this is not intended use: `${{_}}...` instead.",
-                           cap[1].to_string().blue(),
-                           cap[0].to_string().red());
-            return Err("Ambiguous replacement syntax".into());
-        }
+    if let Some(replacement) = &args.replacement {
+        check_for_common_syntax_error(replacement)?;
     }
 
-    // Set: Recurse?
     let walkable_space = if args.recurse {
         tracing::debug!("Recursable WalkDir");
         WalkDir::new(".").min_depth(1)
@@ -126,4 +110,49 @@ fn is_hidden(entry: &walkdir::DirEntry) -> bool {
         tracing::trace!("Not a hidden file: {:?}", entry.path());
     }
     is_hidden
+}
+
+/// Guard: Flagging unintended syntax
+///
+/// Checkes replacement string for capture references making a common syntax error:
+/// A bare reference number followed by chars that would be combined with it and read as a name
+///
+/// e.g. `$1abc` will be parsed as ($1abc) NOT ($1)(abc) -- `${1}abc` is proper syntax
+fn check_for_common_syntax_error(rep_arg: &str) -> Result<()> {
+    const RE_SYNTAX_WARN: &str = r"(\$\d)[^\d\$\s]+";
+
+    let re_check = Regex::new(RE_SYNTAX_WARN).expect("valid, static regex");
+    if let Some(cap) = re_check.captures(rep_arg) {
+        tracing::warn!("\nWarning:\ncapture reference `{}` is being read as `{}`\nIf this is not intended use: `${{_}}...` instead.",
+                       cap[1].to_string().blue(),
+                       cap[0].to_string().red());
+        return Err("Ambiguous replacement syntax".into());
+    }
+    Ok(())
+}
+
+/// Very early error type that can flow into standard error handling with type coercions.
+pub mod error {
+    pub type Result<T> = core::result::Result<T, Error>;
+    pub type Error = Box<dyn std::error::Error>;
+}
+
+/// Simple logging boilerplate code.
+pub mod logging {
+    use tracing_subscriber::EnvFilter;
+
+    pub fn tracing_subscribe_boilerplate(env_min: impl Into<String>) {
+        let filter = EnvFilter::try_new(
+                    std::env::var("RUST_LOG").unwrap_or_else(|_| env_min.into()),
+                )
+                .expect("Valid filter input provided.");
+
+        tracing_subscriber::fmt().pretty()
+                                 .with_env_filter(filter)
+                                 .with_file(true)
+                                 .with_line_number(true)
+                                 .with_thread_ids(true)
+                                 .with_target(true)
+                                 .init();
+    }
 }
