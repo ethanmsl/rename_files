@@ -80,18 +80,21 @@ fn main() -> Result<()> {
         tracing::debug!("for regex '{}' a match was found in entry {}", &args.regex.green(), &entry.purple());
         tracing::debug!("The captures are: {:?}", &captures.blue());
 
-        if let Some(rep) = &args.replacement {
-            let new_name = re.replace(entry, rep);
-            println!("Mapping {} ~~> {}", &entry.black().bold().on_green(), &new_name.red().bold().on_blue());
-
-            if !args.test_run {
-                std::fs::rename(entry, new_name.as_ref())?;
-                println!("...file renamed\n");
-            } else {
-                println!("'--test-run' active, no files renamed\n");
-            }
-        } else {
+        // Guard: get replacement
+        let Some(rep) = &args.replacement else {
             println!("Match found: {}", &entry.black().bold().on_green());
+            continue;
+        };
+
+        let new_name = re.replace(entry, rep);
+        println!("Mapping {} ~~> {}", &entry.black().bold().on_green(), &new_name.red().bold().on_blue());
+
+        // Rename ||| --test-run
+        if !args.test_run {
+            std::fs::rename(entry, new_name.as_ref())?;
+            println!("...file renamed\n");
+        } else {
+            println!("'--test-run' active, no files renamed\n");
         }
     }
 
