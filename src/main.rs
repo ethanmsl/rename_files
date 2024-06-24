@@ -6,11 +6,6 @@
 //! clear; el; carr -- '(C|c)argo.*(\..*)' --rep '${1}ogra$2' --test-run
 //! ```
 
-// Notes:
-// Show files that can and can't be written to.
-// Show files that do and don't match patterns (?)
-// Have limits on what's shown?
-
 use clap::Parser;
 use error::Result;
 use logging::tracing_subscribe_boilerplate;
