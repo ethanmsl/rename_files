@@ -28,7 +28,7 @@ struct Args {
     /// (Rust flavor) regex to search filenames with.
     regex: String,
 
-    /// Replacement string for regex matches. Use `$1`, `${1}` to reference capture groups.
+    /// Replacement string for regex matches. Use `$1` or `${1}`, etc. to reference capture groups.
     #[arg(long = "rep")]
     replacement: Option<String>,
 
@@ -68,7 +68,7 @@ fn main() -> Result<()> {
         };
         // Guard: path->to->str errors (e.g. non-utf8 paths)
         let Some(entry) = entry.path().to_str() else {
-            tracing::error!("Entry that caused a to_string error: {:?}", entry);
+            tracing::error!("Entry path could not convert to a string: {:?}", entry);
             continue;
         };
         // lightGuard: no regex match
