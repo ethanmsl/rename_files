@@ -63,7 +63,7 @@ fn main() -> Result<()> {
     for entry in walkable_space {
         // Guard: walk errors (e.g. loop encountered)
         let Ok(entry) = entry else {
-            tracing::error!("Error encounered while walking dir: {:?}", entry);
+            tracing::error!("Error encountered while walking dir: {:?}", entry);
             continue;
         };
         // Guard: path->to->str errors (e.g. non-utf8 paths)
@@ -114,7 +114,7 @@ fn is_hidden(entry: &walkdir::DirEntry) -> bool {
 
 /// Guard: Flagging unintended syntax
 ///
-/// Checkes replacement string for capture references making a common syntax error:
+/// Checks replacement string for capture references making a common syntax error:
 /// A bare reference number followed by chars that would be combined with it and read as a name
 ///
 /// e.g. `$1abc` will be parsed as ($1abc) NOT ($1)(abc) -- `${1}abc` is proper syntax
