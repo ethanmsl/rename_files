@@ -44,6 +44,12 @@ check:
     -cargo fmt
     -typos
     -committed
+    -cargo test
+
+# Run a specific test with output visible. (Use '' for test_name to see all tests and set log_level)
+test-view test_name="" log_level="error":
+    @echo "'Fun' Fact; the '--test' flag only allows integration test selection and will just fail on unit tests."
+    RUST_LOG={{log_level}} cargo test {{test_name}} -- --nocapture 
 
 # Ad hoc hyperfine tests for the release version of the cli app.
 bench-hyperf regex='ho' :
