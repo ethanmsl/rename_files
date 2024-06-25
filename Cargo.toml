@@ -27,5 +27,6 @@ walkdir = "2"
 #       assert_fs takes predicates and ... also raw strings sometimes.  It's kind of a mess.
 predicates = "3"
 assert_fs = "1"
+test-log = { version = "0.2", features = ["trace"] }
 # quickcheck = "1"
 # quickcheck_macros = "1"
