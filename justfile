@@ -45,6 +45,12 @@ check:
     -typos
     -committed
 
+# Ad hoc hyperfine tests for the release version of the cli app.
+bench-hyperf :
+    @echo "Release:"
+    hyperfine --warmup 3 'target/release/rename_files 'ho' --recurse'
+    hyperfine --warmup 3 'target/release/rename_files 'ho' --rep 'ohhoho' -recurse --test-run'
+
 # Auto-fix errors picked up by check. (Manual exclusion of data folder as additional safeguard.)
 [confirm]
 fix:
