@@ -132,3 +132,47 @@ fn walkdir_build_with_depths(does_recurse: bool) -> WalkDir {
     tracing::debug!("non-recursing (shallow) WalkDir");
     WalkDir::new(".").min_depth(1).max_depth(1)
 }
+
+#[cfg(test)]
+pub mod tests {
+    use super::*;
+
+    #[test]
+    fn test_check_for_common_syntax_error() {
+        let test_cases = vec![("$1abc", true),
+                              ("${1}abc", false),
+                              ("------", false),
+                              ("$1a", true),
+                              ("${1}a", false),
+                              ("------", false),
+                              ("$1", false),
+                              ("${1}", false),
+                              ("------", false),
+                              ("$1 ", false),
+                              ("${1} ", false),
+                              ("------", false),
+                              ("${1} abc ", false),
+                              ("$1 abc ", false),
+                              ("------", false),
+                              ("$1abc$2", true),
+                              ("${1}abc$2", false),
+                              ("$1abc$2def", true),
+                              ("------", false),
+                              ("${1}abc$2def", true),
+                              ("$1abc${2}def", true),
+                              ("${1}abc${2}def", false),
+                              ("------", false),
+                              ("${1} $2", false),
+                              ("$1$2 ", false)];
+
+        for (input, expect_error) in test_cases {
+            let result = check_for_common_syntax_error(input);
+            match (result.is_err(), expect_error) {
+                (true, true) => continue,
+                (false, false) => continue,
+                (true, false) => panic!("Expected no error for input: {}", input),
+                (false, true) => panic!("Expected an error for input: {}", input),
+            }
+        }
+    }
+}
