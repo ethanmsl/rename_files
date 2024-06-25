@@ -46,11 +46,14 @@ check:
     -committed
 
 # Ad hoc hyperfine tests for the release version of the cli app.
-bench-hyperf :
-    @echo "Release:"
-    hyperfine --warmup 3 'target/release/rename_files 'ho' --recurse'
-    hyperfine --warmup 3 'target/release/rename_files 'ho' --rep 'ohhoho' -recurse --test-run'
-
+bench-hyperf regex='ho' :
+    @echo "{{GRN}}Release{{NC}}, search-only:"
+    hyperfine --warmup 3 "target/release/rename_files '{{regex}}' --recurse"
+    @echo "{{GRN}}Release{{NC}}, search & replace, no file write:"
+    hyperfine --warmup 3 "target/release/rename_files '{{regex}}' --rep 'ohhoho' --recurse --test-run"
+    @echo "{{PRP}}Comparison{{NC}}: fd --unrestricted, search-only:"
+    hyperfine --warmup 3 "fd --unrestricted '{{regex}}'"
+    
 # Auto-fix errors picked up by check. (Manual exclusion of data folder as additional safeguard.)
 [confirm]
 fix:
