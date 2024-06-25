@@ -7,7 +7,6 @@
 /// Already have general regex search.  May implement if need an ergonomic 'quick path'.
 ///
 /// # Note: This will trigger on the `.` used to indicate the 'local' directory
-#[allow(unused)]
 fn is_hidden(entry: &walkdir::DirEntry) -> bool {
     let is_hidden = entry.file_name().to_str().map(|s| s.starts_with('.')).unwrap_or(false);
     if is_hidden {
