@@ -6,10 +6,11 @@
 //! clear; el; carr -- '(C|c)argo.*(\..*)' --rep '${1}ogra$2' --test-run
 //! ```
 
-use rename_files::{app, error::Result, logging::tracing_subscribe_boilerplate};
+use clap::Parser;
+use rename_files::{app, error::Result, logging::tracing_subscribe_boilerplate, Args};
 
 fn main() -> Result<()> {
     tracing_subscribe_boilerplate("warn");
-
-    app()
+    let args = Args::parse();
+    app(&args)
 }
