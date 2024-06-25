@@ -8,16 +8,24 @@ edition = "2021"
 unsafe_code = { level = "forbid" }
 
 [dependencies]
-# assert_fs = "1"
 # chrono = "0.4"
 clap = { version = "4", features = ["derive", "wrap_help"] }
 # derive_more = "0.99"
 # indicatif = "0.17"
 # itertools = "0.13"
 owo-colors = "4"
-# quickcheck = "1"
-# quickcheck_macros = "1"
 regex = { version = "1", features = ["logging"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["chrono", "env-filter"] }
 walkdir = "2"
+
+[dev-dependencies]
+# NOTE: I have deep misgivings about using the "predicates" & "assert_fs" crates.
+#       They have a strong 'obtuse framework' feel.  And I'm not certain if they are work saving.
+#       They also have, if you accept and ... trust.. some of their oddness, almost precisely what I'm looking for.
+#       I will try and consider them at least.
+#       assert_fs takes predicates and ... also raw strings sometimes.  It's kind of a mess.
+predicates = "3"
+assert_fs = "1"
+# quickcheck = "1"
+# quickcheck_macros = "1"
