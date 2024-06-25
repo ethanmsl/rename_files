@@ -1,5 +1,6 @@
 PROGRAM_NAME,ALIAS,PROGRAM_VERSION,PROGRAM_INSTALL
 just,justfile,,"cargo install just"
 typos,typos-cli,,"cargo install typos-cli"
+committed,,,"cargo install committed"
 xsv,,,"cargo install xsv"
 hyperfine,,,"cargo install hyperfine"
