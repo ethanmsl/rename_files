@@ -33,6 +33,7 @@ pub struct Args {
 }
 
 /// Application code.  (main in lib.rs)
+#[tracing::instrument]
 pub fn app(args: &Args) -> Result<()> {
     let re = Regex::new(&args.regex)?;
 
