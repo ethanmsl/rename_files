@@ -40,9 +40,7 @@ pub fn app(args: &Args) -> Result<()> {
         check_for_common_syntax_error(replacement)?;
     }
     let walkable_space = walkdir_build_with_depths(args.recurse);
-    let num_matches = core_process_loop(walkable_space, &re, args)?;
-    println!("Total matches: {}", num_matches.cyan());
-    Ok(())
+    core_process_loop(walkable_space, &re, args)
 }
 
 /// Walks a WalkDir, handles errors, prints matches, optionally executes
@@ -60,7 +58,7 @@ pub fn app(args: &Args) -> Result<()> {
 /// guards quite awkward.  And the workarounds end up being deeply nested and more verbose
 /// without any clear benefit.
 #[tracing::instrument]
-fn core_process_loop(walkable_space: WalkDir, re: &Regex, args: &Args) -> Result<u64> {
+fn core_process_loop(walkable_space: WalkDir, re: &Regex, args: &Args) -> Result<()> {
     let rep = &args.replacement;
     let is_test_run = args.test_run;
     let mut num_matches: u64 = 0;
@@ -98,7 +96,8 @@ fn core_process_loop(walkable_space: WalkDir, re: &Regex, args: &Args) -> Result
         println!("Renaming: {} ~~> {}", &entry.black().bold().on_green(), &new_filename.red().bold().on_blue());
         std::fs::rename(entry, new_filename.as_ref())?;
     }
-    Ok(num_matches)
+    println!("Total matches: {}", num_matches.cyan());
+    Ok(())
 }
 
 /// Guard: Flagging unintended syntax
