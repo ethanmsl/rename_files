@@ -7,10 +7,10 @@
 //! ```
 
 use clap::Parser;
-use rename_files::{app, error::Result, logging::tracing_subscribe_boilerplate, Args};
+use rename_files::{app, error::Result, logging, Args};
 
 fn main() -> Result<()> {
-    tracing_subscribe_boilerplate("warn");
+    logging::tracing_subscribe_boilerplate("warn");
     let args = Args::parse();
     app(&args)
 }
