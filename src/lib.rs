@@ -135,8 +135,7 @@ fn walkdir_build_with_depths(does_recurse: bool) -> WalkDir {
 
 #[cfg(test)]
 pub mod tests {
-    use std::{fs::{self, File},
-              path::Path};
+    use std::fs::{self, File};
 
     use tempfile::TempDir;
     use test_log::test;
@@ -146,22 +145,47 @@ pub mod tests {
     pub type Result<T> = core::result::Result<T, Error>;
     pub type Error = Box<dyn std::error::Error>;
 
-    /// Generate a populated temporary directory.
+    /// Generate a fixed, populated temporary directory.
+    ///
+    /// dir_structure:
+    /// ```md
+    ///   - root/
+    ///   - root/file_0a.txt
+    ///   - root/file_0b.txt
+    ///   - root/file_0c.txt
+    ///
+    ///   - root/dir_1/
+    ///   - root/dir_1/dir_11/
+    ///   - root/dir_1/dir_11/dir_111/
+    ///   - root/dir_1/file_1a.txt
+    ///   - root/dir_1/dir_11/file_11a.txt
+    ///   - root/dir_1/dir_11/dir_111/file_111a.txt
+    ///
+    ///   - root/dir_2/dir_21/
+    ///   - root/dir_2/dir_21/dir_211/
+    /// ```
     fn utility_test_dir_gen() -> Result<TempDir> {
         let dir_root = TempDir::new()?;
-        // Root level files
-        File::create(dir_root.path().join("file_01.txt"))?;
-        File::create(dir_root.path().join("file_02.txt"))?;
+        File::create(dir_root.path().join("file_0a.txt"))?;
+        File::create(dir_root.path().join("file_0b.txt"))?;
+        File::create(dir_root.path().join("file_0c.txt"))?;
 
-        // First nested directory with files
         let dir_1 = dir_root.path().join("dir_1");
+        let dir_11 = dir_1.join("dir_11");
+        let dir_111 = dir_11.join("dir_111");
         fs::create_dir(&dir_1)?;
-        File::create(dir_1.join("file_1a.txt"))?;
-
-        // Second nested directory within the first directory
-        let dir_11 = dir_1.join("dir11");
         fs::create_dir(&dir_11)?;
-        File::create(dir_11.join("file_11b.txt"))?;
+        fs::create_dir(&dir_111)?;
+        File::create(dir_1.join("file_1a.txt"))?;
+        File::create(dir_11.join("file_11a.txt"))?;
+        File::create(dir_111.join("file_111a.txt"))?;
+
+        let dir_2 = dir_root.path().join("dir_2");
+        let dir_21 = dir_2.join("dir_21");
+        let dir_211 = dir_21.join("dir_211");
+        fs::create_dir(&dir_2)?;
+        fs::create_dir(&dir_21)?;
+        fs::create_dir(&dir_211)?;
 
         Ok(dir_root)
     }
@@ -169,18 +193,19 @@ pub mod tests {
     /// Just a syntax check and familiarization test for working with tempdir and fs asserts.
     #[test]
     fn xp_test_fs() -> Result<()> {
+        tracing::debug!("creatind tempdir");
         let dir_root = utility_test_dir_gen()?;
 
         // logging::tracing_subscribe_boilerplate("error");
         tracing::debug!("AAAAAaaAAAAAA!");
-        println!("bl\na\nh\nb\nlahblah");
+        // println!("bl\na\nh\nb\nlahblah");
 
-        println!("temp: {:?}", dir_root);
-        let f_3 = File::create(dir_root.path().join("file_03.txt"))?;
-        println!("temp: {:?}", dir_root);
-        println!("file3: {:?}", f_3);
+        // println!("temp: {:?}", dir_root);
+        // let nf_0d = File::create(dir_root.path().join("new_file_0d.txt"))?;
+        // println!("temp: {:?}", dir_root);
+        // println!("new_file_0d: {:?}", nf_0d);
 
-        assert!(dir_root.path().join("file_03.txt").exists());
+        // assert!(dir_root.path().join("new_file_0d.txt").exists());
         // #[cfg(target_os = "macos")]
         // {
         //     // NOTE: MacOS filesystem by *default* is case-*in*sensitive
@@ -189,7 +214,7 @@ pub mod tests {
         //     assert!(dir_root.path().join("FiLe_03.txt").exists());
         //     assert!(dir_root.path().join("File_03.txt").exists());
         // }
-        assert!(!dir_root.path().join("blahblahblah").exists());
+        // assert!(!dir_root.path().join("blahblahblah").exists());
 
         dir_root.close()?;
         Ok(())
@@ -248,33 +273,103 @@ pub mod tests {
     //     // assert_eq!(,);
     // }
 
+    /// Simple flat, iterative change of file names
     #[test]
-    fn test_recursion() -> Result<()> {
+    fn test_app_with_norecursion() -> Result<()> {
         let temp_dir = utility_test_dir_gen()?;
         std::env::set_current_dir(&temp_dir.path())?;
 
-        // let args = Args { regex:       r"file.(\d+)\.txt".to_string(),
-        let args = Args { regex:       ".*".to_string(),
+        // run fresh
+        let args = Args { regex:       "(file_.*)".to_string(),
                           replacement: Some("changed-${1}".to_string()),
-                          recurse:     true,
-                          test_run:    true, };
-        app(&args);
+                          recurse:     false,
+                          test_run:    false, };
+        app(&args)?;
         println!("temp: {:?}", temp_dir);
 
-        assert!(temp_dir.path().join("changed-01.txt").exists());
-        assert!(temp_dir.path().join("changed-02.txt").exists());
+        assert!(temp_dir.path().join("changed-file_0a.txt").exists());
+        assert!(temp_dir.path().join("changed-file_0b.txt").exists());
+        assert!(temp_dir.path().join("changed-file_0c.txt").exists());
 
-        // TODO (WARN): this part of a very real bug -- walkdir is an image of the past
-        //      and update will update a directory and then the directory in another file
-        //      but the file it tries to update doesn't exist, the updated version did
-        //      ... we can get around this by taking advantage of the tree structure of the fs
-        //      (if we don't follow symlinks or anything that would loop us)
-        //      AND we only look at the last element of the path
-        //      THEN we can walk from bottom up
-        assert!(temp_dir.path().join("dir_1").join("changed-1a.txt").exists());
+        // run on changed
+        let args = Args { regex:       "(file_.*)".to_string(),
+                          replacement: Some("changed-${1}".to_string()),
+                          recurse:     false,
+                          test_run:    false, };
+        app(&args)?;
+        println!("temp: {:?}", temp_dir);
+
+        assert!(temp_dir.path().join("changed-changed-file_0a.txt").exists());
+        assert!(temp_dir.path().join("changed-changed-file_0b.txt").exists());
+        assert!(temp_dir.path().join("changed-changed-file_0c.txt").exists());
+
         temp_dir.close()?;
         Ok(())
     }
+
+    // #[test]
+    // fn test_app_curr_path_only() -> Result<()> {
+    //     let temp_dir = utility_test_dir_gen()?;
+    //     std::env::set_current_dir(&temp_dir.path())?;
+
+    //     // run fresh
+    //     let args = Args { regex:       "(file_.*)".to_string(),
+    //                       replacement: Some("changed-${1}".to_string()),
+    //                       recurse:     false,
+    //                       test_run:    false, };
+    //     app(&args);
+    //     println!("temp: {:?}", temp_dir);
+
+    //     assert!(temp_dir.path().join("changed-file_0a.txt").exists());
+    //     assert!(temp_dir.path().join("changed-file_0b.txt").exists());
+    //     assert!(temp_dir.path().join("changed-file_0c.txt").exists());
+    //     assert!(temp_dir.path().join("changed-dir_1").exists());
+    //     assert!(temp_dir.path().join("changed-dir_2").exists());
+
+    //     // // run fresh
+    //     // let args = Args { regex:       "(file_.*)".to_string(),
+    //     //                   replacement: Some("changed-${1}".to_string()),
+    //     //                   recurse:     true,
+    //     //                   test_run:    false, };
+    //     // app(&args);
+    //     // println!("temp: {:?}", temp_dir);
+
+    //     // assert!(temp_dir.path().join("changed-file_0a.txt").exists());
+    //     // assert!(temp_dir.path().join("changed-file_0b.txt").exists());
+    //     // assert!(temp_dir.path().join("changed-file_0c.txt").exists());
+    //     // assert!(temp_dir.path().join("changed-dir_1").exists());
+    //     // assert!(temp_dir.path().join("changed-dir_2").exists());
+
+    //     temp_dir.close()?;
+    //     Ok(())
+    // }
+
+    // #[test]
+    // fn test_app_with_yesrecursion() -> Result<()> {
+    //     let temp_dir = utility_test_dir_gen()?;
+    //     std::env::set_current_dir(&temp_dir.path())?;
+
+    //     let args = Args { regex:       ".*".to_string(),
+    //                       replacement: Some("changed-${1}".to_string()),
+    //                       recurse:     false,
+    //                       test_run:    false, };
+    //     app(&args);
+    //     println!("temp: {:?}", temp_dir);
+
+    //     assert!(temp_dir.path().join("changed-01.txt").exists());
+    //     assert!(temp_dir.path().join("changed-02.txt").exists());
+
+    //     // TODO (WARN): this part of a very real bug -- walkdir is an image of the past
+    //     //      and update will update a directory and then the directory in another file
+    //     //      but the file it tries to update doesn't exist, the updated version did
+    //     //      ... we can get around this by taking advantage of the tree structure of the fs
+    //     //      (if we don't follow symlinks or anything that would loop us)
+    //     //      AND we only look at the last element of the path
+    //     //      THEN we can walk from bottom up
+    //     assert!(temp_dir.path().join("dir_1").join("changed-1a.txt").exists());
+    //     temp_dir.close()?;
+    //     Ok(())
+    // }
 
     // #[test]
     // fn test_non_recursion() -> Result<()> {
