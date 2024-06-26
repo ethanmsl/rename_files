@@ -135,8 +135,54 @@ fn walkdir_build_with_depths(does_recurse: bool) -> WalkDir {
 
 #[cfg(test)]
 pub mod tests {
+    use std::path::Path;
+
+    use assert_fs::prelude::*;
+    use predicates::prelude::*;
+    use test_log::test;
+
     use super::*;
 
+    /// Generate a temporary directory
+    fn utility_test_dir_gen() -> assert_fs::TempDir {
+        let tempdir = assert_fs::TempDir::new().unwrap();
+        let child_path = tempdir.child("foo.txt");
+        child_path.touch().unwrap();
+        tempdir
+    }
+
+    #[test]
+    fn xp_test() {
+        let dir = utility_test_dir_gen();
+
+        // logging::tracing_subscribe_boilerplate("error");
+        tracing::debug!("AAAAAaaAAAAAA!");
+        println!("bl\na\nh\nb\nlahblah");
+
+        println!("temp: {:?}", dir);
+        let bap_file_path = dir.child("bap.txt");
+        bap_file_path.touch().unwrap();
+        println!("temp: {:?}", dir);
+        let _ = dir.child("bar.txt").assert(predicate::path::missing());
+        let _ = dir.child("bap.txt").assert(predicate::path::eq_file(dir.path().join(Path::new("bap.txt"))));
+
+        // Both of the following error assert(a()) *and* asert(a().not())
+        // as seen above the 'predicates' created are also deeply nested, with something like 4 `)` at the end
+        // I'm going to commit and this and call it -- this is a bad path -- these crates create more difficulty than they solve
+        // it *would* be easy to work around them and finish, but at the cost of doing work to solve an obfuscating framework
+        // rather than working ona  areal problem
+        //
+        // let _ = dir.child("bap.txt").assert(predicate::path::eq_file(Path::new("bap.txt")));
+        // let _ = dir.child("bap.txt").assert(predicate::path::eq_file(Path::new("bap.txt")).not());
+
+        dir.close().unwrap();
+        // assert_eq!(1, 2);
+    }
+
+    // Test the app() function
+    // Test the core_process_loop() function
+
+    /// Test the check_for_common_syntax_error() function
     #[test]
     fn test_check_for_common_syntax_error() {
         let test_cases = vec![("$1abc", true),
@@ -175,4 +221,15 @@ pub mod tests {
             }
         }
     }
+
+    // /// Test the walkdir_build_with_depths() function
+    // fn test_walkdir_build_with_depths() {
+    //     let walkdir = walkdir_build_with_depths(true);
+    //     // assert_eq!(,);
+    //     // assert_eq!(,);
+
+    //     let walkdir = walkdir_build_with_depths(false);
+    //     // assert_eq!(,);
+    //     // assert_eq!(,);
+    // }
 }
