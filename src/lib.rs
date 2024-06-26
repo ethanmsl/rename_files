@@ -135,48 +135,59 @@ fn walkdir_build_with_depths(does_recurse: bool) -> WalkDir {
 
 #[cfg(test)]
 pub mod tests {
-    use std::path::Path;
+    use std::{fs::{self, File},
+              path::Path};
 
-    use assert_fs::prelude::*;
-    use predicates::prelude::*;
+    use tempfile::TempDir;
     use test_log::test;
 
     use super::*;
 
     /// Generate a temporary directory
-    fn utility_test_dir_gen() -> assert_fs::TempDir {
-        let tempdir = assert_fs::TempDir::new().unwrap();
-        let child_path = tempdir.child("foo.txt");
-        child_path.touch().unwrap();
-        tempdir
+    fn utility_test_dir_gen() -> Result<TempDir> {
+        let dir_root = TempDir::new()?;
+        // Root level files
+        File::create(dir_root.path().join("file_01.txt"))?;
+        File::create(dir_root.path().join("file_02.txt"))?;
+
+        // First nested directory with files
+        let dir_1 = dir_root.path().join("dir_1");
+        fs::create_dir(&dir_1)?;
+        File::create(dir_1.join("file_1a.txt"))?;
+
+        // Second nested directory within the first directory
+        let dir_11 = dir_1.join("dir11");
+        fs::create_dir(&dir_11)?;
+        File::create(dir_11.join("file_11b.txt"))?;
+
+        Ok(dir_root)
     }
 
     #[test]
     fn xp_test() {
-        let dir = utility_test_dir_gen();
+        let dir_root = utility_test_dir_gen().unwrap();
 
         // logging::tracing_subscribe_boilerplate("error");
         tracing::debug!("AAAAAaaAAAAAA!");
         println!("bl\na\nh\nb\nlahblah");
 
-        println!("temp: {:?}", dir);
-        let bap_file_path = dir.child("bap.txt");
-        bap_file_path.touch().unwrap();
-        println!("temp: {:?}", dir);
-        let _ = dir.child("bar.txt").assert(predicate::path::missing());
-        let _ = dir.child("bap.txt").assert(predicate::path::eq_file(dir.path().join(Path::new("bap.txt"))));
+        println!("temp: {:?}", dir_root);
+        let f_3 = File::create(dir_root.path().join("file_03.txt")).unwrap();
+        println!("temp: {:?}", dir_root);
+        println!("file3: {:?}", f_3);
 
-        // Both of the following error assert(a()) *and* asert(a().not())
-        // as seen above the 'predicates' created are also deeply nested, with something like 4 `)` at the end
-        // I'm going to commit and this and call it -- this is a bad path -- these crates create more difficulty than they solve
-        // it *would* be easy to work around them and finish, but at the cost of doing work to solve an obfuscating framework
-        // rather than working ona  areal problem
-        //
-        // let _ = dir.child("bap.txt").assert(predicate::path::eq_file(Path::new("bap.txt")));
-        // let _ = dir.child("bap.txt").assert(predicate::path::eq_file(Path::new("bap.txt")).not());
+        assert!(dir_root.path().join("file_03.txt").exists());
+        // #[cfg(target_os = "macos")]
+        // {
+        //     // NOTE: MacOS filesystem by *default* is case-*in*sensitive
+        //     //       This is *not* an invariant on MacOS (despite my cfg logic)
+        //     //       Nor is it the default in Linux, commonly
+        //     assert!(dir_root.path().join("FiLe_03.txt").exists());
+        //     assert!(dir_root.path().join("File_03.txt").exists());
+        // }
+        assert!(!dir_root.path().join("blahblahblah").exists());
 
-        dir.close().unwrap();
-        // assert_eq!(1, 2);
+        dir_root.close().expect("expected tempdir cleanup");
     }
 
     // Test the app() function
@@ -230,5 +241,45 @@ pub mod tests {
     //     let walkdir = walkdir_build_with_depths(false);
     //     // assert_eq!(,);
     //     // assert_eq!(,);
+    // }
+
+    // #[test]
+    // fn test_recursion() -> Result<()> {
+    //     let temp_dir = setup_nested_files().unwrap();
+    //     env::set_current_dir(&temp_dir.path())?;
+
+    //     let args = Args { regex:       r"file.(\d+)\.txt".to_string(),
+    //                       replacement: Some("changed-${1}.txt".to_string()),
+    //                       recurse:     true,
+    //                       test_run:    false, };
+
+    //     app(&args);
+    //     println!("temp: {:?}", temp_dir);
+
+    //     assert!(temp_dir.path().join("changed-01.txt").exists());
+    //     assert!(temp_dir.path().join("changed-02.txt").exists());
+    //     assert!(temp_dir.path().join("dir1/changed-1a.txt").exists());
+    //     assert!(temp_dir.path().join("dir1/dir11/changed-11b.txt").exists());
+    //     Ok(())
+    // }
+
+    // #[test]
+    // fn test_non_recursion() -> Result<()> {
+    //     let temp_dir = setup_nested_files().unwrap();
+
+    //     let args = Args { regex:       r"file.(\d+)\.txt".to_string(),
+    //                       replacement: Some("changed-${1}.txt".to_string()),
+    //                       recurse:     false,
+    //                       test_run:    false, };
+
+    //     let boop = app(&args);
+    //     dbg!(&boop);
+
+    //     assert!(temp_dir.path().join("changed-01.txt").exists());
+    //     assert!(temp_dir.path().join("changed-02.txt").exists());
+    //     // These files should not be renamed because recursion is disabled
+    //     assert!(!temp_dir.path().join("dir1/changed-1a.txt").exists());
+    //     assert!(!temp_dir.path().join("dir1/dir11/changed-11b.txt").exists());
+    //     Ok(())
     // }
 }
