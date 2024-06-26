@@ -47,9 +47,9 @@ pub fn app(args: &Args) -> Result<()> {
 /// Walks a WalkDir, handles errors, prints matches, optionally executes
 ///
 /// # Note 1, single-purpose violation:
-/// Breang this functiontrueinto smaller pieces would create indirection and complexitki;
-/// for very little benefit given the brevity of the code and the linear logic chain at work.
-/// (this does come at the cost of a somewhat ambiguous function name :shru.co
+/// Breaking this function into smaller pieces would create indirection and complexity.
+/// For very little benefit given the brevity of the code and the linear logic chain at work.
+/// (this does come at the cost of a somewhat ambiguous function name :shrug:)
 ///
 /// # Note 2, loop vs iterator choice:
 /// Would be charming as an iterator.  Perhaps using itertools `map_ok` to transform
@@ -88,7 +88,6 @@ fn core_process_loop(walkable_space: WalkDir, re: &Regex, args: &Args) -> Result
             tracing::trace!("No Match for Entry: {:?}", filename);
             continue;
         };
-        // tracing::info!(?x);
         num_matches += 1;
         // Guard: no replacement
         let Some(rep) = rep else {
@@ -108,8 +107,7 @@ fn core_process_loop(walkable_space: WalkDir, re: &Regex, args: &Args) -> Result
                  parent.to_string_lossy().blue(),
                  &filename.black().bold().on_green(),
                  &new_filename.red().bold().on_blue());
-        let x = entry.with_file_name(new_filename.as_ref());
-        std::fs::rename(entry, x)?;
+        std::fs::rename(entry, entry.with_file_name(new_filename.as_ref()))?;
         // std::fs::rename(entry, new_filename.as_ref())?;
     }
     println!("Total matches: {}", num_matches.cyan());
@@ -205,36 +203,6 @@ pub mod tests {
         Ok(dir_root)
     }
 
-    /// Just a syntax check and familiarization test for working with tempdir and fs asserts.
-    #[test]
-    fn xp_test_fs() -> Result<()> {
-        tracing::debug!("creatind tempdir");
-        let dir_root = utility_test_dir_gen()?;
-
-        // logging::tracing_subscribe_boilerplate("error");
-        tracing::debug!("AAAAAaaAAAAAA!");
-        // println!("bl\na\nh\nb\nlahblah");
-
-        // println!("temp: {:?}", dir_root);
-        // let nf_0d = File::create(dir_root.path().join("new_file_0d.txt"))?;
-        // println!("temp: {:?}", dir_root);
-        // println!("new_file_0d: {:?}", nf_0d);
-
-        // assert!(dir_root.path().join("new_file_0d.txt").exists());
-        // #[cfg(target_os = "macos")]
-        // {
-        //     // NOTE: MacOS filesystem by *default* is case-*in*sensitive
-        //     //       This is *not* an invariant on MacOS (despite my cfg logic)
-        //     //       Nor is it the default in Linux, commonly
-        //     assert!(dir_root.path().join("FiLe_03.txt").exists());
-        //     assert!(dir_root.path().join("File_03.txt").exists());
-        // }
-        // assert!(!dir_root.path().join("blahblahblah").exists());
-
-        dir_root.close()?;
-        Ok(())
-    }
-
     // Test the app() function
     // Test the core_process_loop() function
 
@@ -258,8 +226,8 @@ pub mod tests {
                               //
                               ("$1abc$2", true),
                               ("${1}abc$2", false),
-                              ("$1abc$2def", true),
                               //
+                              ("$1abc$2def", true),
                               ("${1}abc$2def", true),
                               ("$1abc${2}def", true),
                               ("${1}abc${2}def", false),

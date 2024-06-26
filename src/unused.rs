@@ -16,3 +16,32 @@ fn is_hidden(entry: &walkdir::DirEntry) -> bool {
     }
     is_hidden
 }
+
+/// Just a syntax check and familiarization test for working with tempdir and fs asserts.
+#[test]
+fn xp_test_fs() -> Result<()> {
+    tracing::debug!("creatind tempdir");
+    let dir_root = utility_test_dir_gen()?;
+
+    tracing::debug!("debug level statement");
+    println!("testing\na\nb\nc\nd\ntesting\n");
+
+    println!("temp: {:?}", dir_root);
+    let nf_0d = File::create(dir_root.path().join("new_file_0d.txt"))?;
+    println!("temp: {:?}", dir_root);
+    println!("new_file_0d: {:?}", nf_0d);
+
+    assert!(!dir_root.path().join("blahblahblah").exists());
+    assert!(dir_root.path().join("new_file_0d.txt").exists());
+    #[cfg(target_os = "macos")]
+    {
+        // NOTE: MacOS filesystem by *default* is case-*in*sensitive
+        //       This is *not* an invariant on MacOS (despite my cfg logic)
+        //       Nor is it the default in Linux, commonly
+        assert!(dir_root.path().join("New_file_0d.txt").exists());
+        assert!(dir_root.path().join("nEw_FiLe_0D.tXt").exists());
+    }
+
+    dir_root.close()?;
+    Ok(())
+}
