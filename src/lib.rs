@@ -143,7 +143,10 @@ pub mod tests {
 
     use super::*;
 
-    /// Generate a temporary directory
+    pub type Result<T> = core::result::Result<T, Error>;
+    pub type Error = Box<dyn std::error::Error>;
+
+    /// Generate a populated temporary directory.
     fn utility_test_dir_gen() -> Result<TempDir> {
         let dir_root = TempDir::new()?;
         // Root level files
@@ -163,16 +166,17 @@ pub mod tests {
         Ok(dir_root)
     }
 
+    /// Just a syntax check and familiarization test for working with tempdir and fs asserts.
     #[test]
-    fn xp_test() {
-        let dir_root = utility_test_dir_gen().unwrap();
+    fn xp_test_fs() -> Result<()> {
+        let dir_root = utility_test_dir_gen()?;
 
         // logging::tracing_subscribe_boilerplate("error");
         tracing::debug!("AAAAAaaAAAAAA!");
         println!("bl\na\nh\nb\nlahblah");
 
         println!("temp: {:?}", dir_root);
-        let f_3 = File::create(dir_root.path().join("file_03.txt")).unwrap();
+        let f_3 = File::create(dir_root.path().join("file_03.txt"))?;
         println!("temp: {:?}", dir_root);
         println!("file3: {:?}", f_3);
 
@@ -187,7 +191,8 @@ pub mod tests {
         // }
         assert!(!dir_root.path().join("blahblahblah").exists());
 
-        dir_root.close().expect("expected tempdir cleanup");
+        dir_root.close()?;
+        Ok(())
     }
 
     // Test the app() function
