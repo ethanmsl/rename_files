@@ -277,17 +277,6 @@ pub mod tests {
         }
     }
 
-    // /// Test the walkdir_build_with_depths() function
-    // fn test_walkdir_build_with_depths() {
-    //     let walkdir = walkdir_build_with_depths(true);
-    //     // assert_eq!(,);
-    //     // assert_eq!(,);
-
-    //     let walkdir = walkdir_build_with_depths(false);
-    //     // assert_eq!(,);
-    //     // assert_eq!(,);
-    // }
-
     /// Simple flat, iterative change of file names
     #[test]
     fn test_app_with_norecursion() -> Result<()> {
