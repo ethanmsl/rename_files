@@ -187,30 +187,29 @@ pub mod tests {
     fn test_check_for_common_syntax_error() {
         let test_cases = vec![("$1abc", true),
                               ("${1}abc", false),
-                              ("------", false),
+                              //
                               ("$1a", true),
                               ("${1}a", false),
-                              ("------", false),
+                              //
                               ("$1", false),
                               ("${1}", false),
-                              ("------", false),
+                              //
                               ("$1 ", false),
                               ("${1} ", false),
-                              ("------", false),
+                              //
                               ("${1} abc ", false),
                               ("$1 abc ", false),
-                              ("------", false),
+                              //
                               ("$1abc$2", true),
                               ("${1}abc$2", false),
                               ("$1abc$2def", true),
-                              ("------", false),
+                              //
                               ("${1}abc$2def", true),
                               ("$1abc${2}def", true),
                               ("${1}abc${2}def", false),
-                              ("------", false),
+                              //
                               ("${1} $2", false),
                               ("$1$2 ", false)];
-
         for (input, expect_error) in test_cases {
             let result = check_for_common_syntax_error(input);
             match (result.is_err(), expect_error) {
