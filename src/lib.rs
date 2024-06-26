@@ -40,7 +40,13 @@ pub fn app(args: &Args) -> Result<()> {
     if let Some(replacement) = &args.replacement {
         check_for_common_syntax_error(replacement)?;
     }
-    let walkable_space = walkdir_build_with_depths(args.recurse);
+
+    // let walkable_space = walkdir_build_with_depths(args.recurse);
+    if args.recurse {
+        return Err("Recursion option has been temporarily suspended. Only operations on flat paths currently available.".into());
+    }
+    let todo_recurse = false; // temporary workaround until we fix recurse logic and path end element only change logic
+    let walkable_space = walkdir_build_with_depths(todo_recurse);
     core_process_loop(walkable_space, &re, args)
 }
 
