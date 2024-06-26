@@ -248,25 +248,33 @@ pub mod tests {
     //     // assert_eq!(,);
     // }
 
-    // #[test]
-    // fn test_recursion() -> Result<()> {
-    //     let temp_dir = setup_nested_files().unwrap();
-    //     env::set_current_dir(&temp_dir.path())?;
+    #[test]
+    fn test_recursion() -> Result<()> {
+        let temp_dir = utility_test_dir_gen()?;
+        std::env::set_current_dir(&temp_dir.path())?;
 
-    //     let args = Args { regex:       r"file.(\d+)\.txt".to_string(),
-    //                       replacement: Some("changed-${1}.txt".to_string()),
-    //                       recurse:     true,
-    //                       test_run:    false, };
+        // let args = Args { regex:       r"file.(\d+)\.txt".to_string(),
+        let args = Args { regex:       ".*".to_string(),
+                          replacement: Some("changed-${1}".to_string()),
+                          recurse:     true,
+                          test_run:    true, };
+        app(&args);
+        println!("temp: {:?}", temp_dir);
 
-    //     app(&args);
-    //     println!("temp: {:?}", temp_dir);
+        assert!(temp_dir.path().join("changed-01.txt").exists());
+        assert!(temp_dir.path().join("changed-02.txt").exists());
 
-    //     assert!(temp_dir.path().join("changed-01.txt").exists());
-    //     assert!(temp_dir.path().join("changed-02.txt").exists());
-    //     assert!(temp_dir.path().join("dir1/changed-1a.txt").exists());
-    //     assert!(temp_dir.path().join("dir1/dir11/changed-11b.txt").exists());
-    //     Ok(())
-    // }
+        // TODO (WARN): this part of a very real bug -- walkdir is an image of the past
+        //      and update will update a directory and then the directory in another file
+        //      but the file it tries to update doesn't exist, the updated version did
+        //      ... we can get around this by taking advantage of the tree structure of the fs
+        //      (if we don't follow symlinks or anything that would loop us)
+        //      AND we only look at the last element of the path
+        //      THEN we can walk from bottom up
+        assert!(temp_dir.path().join("dir_1").join("changed-1a.txt").exists());
+        temp_dir.close()?;
+        Ok(())
+    }
 
     // #[test]
     // fn test_non_recursion() -> Result<()> {
