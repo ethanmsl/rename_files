@@ -1,5 +1,13 @@
 # File Rename Utility
 
+> [!WARNING]  
+> Tests are passing, but CI/CD tests are failing.
+> Mass texting with `cargo-nextest` or individutal tests with `cargo-test` both _succeed_.
+> However mass testing with `cargo-test` results in parallel tests using the same temporary files (which should be separate for each test).
+> Currently looking into cause.  Both nextest & test have parallel testing strategies.  And the testing utility function to create a populated directory should create a unique root dir id each time.  (compile flag differenes between cargo-test and cargo-nextest)?
+> TLDR: code working, but CI/CD and cargo-test aren't interfacing as desired.  -- working on --
+
+## Summary:
 I just needed to batch rename some files and figured I'd write a script with rust to operate using general regexes rather than use one of the (many) existing solutions.
 
 This is just a 'does what I need' command, with it's purpose being to have written it more than to use it.  But it meets my needs quite well.
