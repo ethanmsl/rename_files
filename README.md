@@ -1,11 +1,10 @@
 # File Rename Utility
 
-> [!WARNING]  
-> Tests are passing, but CI/CD tests are failing.
-> Mass texting with `cargo-nextest` or individutal tests with `cargo-test` both _succeed_.
-> However mass testing with `cargo-test` results in parallel tests using the same temporary files (which should be separate for each test).
-> Currently looking into cause.  Both nextest & test have parallel testing strategies.  And the testing utility function to create a populated directory should create a unique root dir id each time.  (compile flag differenes between cargo-test and cargo-nextest)?
-> TLDR: code working, but CI/CD and cargo-test aren't interfacing as desired.  -- working on --
+> [!TIP]  
+> CI/CD: Runs normally in *parallel* with `cargo nextest` or *serially* with `cargo test`.
+> However, if run BOTH in *parallel* AND with `cargo test` then the tests attempt to use files modified by the other tests. 
+> I have yet to determine the cause of this difference between nextest and default-test behavior.  The `TempDir` created by `tempfile` should be unique each time and locally referenced.  I have yet to think of a reasonable way that this could occur, unless nextest is performing serially and the compiler is pre-computing in a way that prevents TempDir naming randomization.
+> Current CI/CD work around is forcing `cargo test` to run on a single thread. (`-- --test-threads 1`)
 
 ## Summary:
 I just needed to batch rename some files and figured I'd write a script with rust to operate using general regexes rather than use one of the (many) existing solutions.
