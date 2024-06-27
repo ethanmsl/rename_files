@@ -249,8 +249,9 @@ pub mod tests {
     #[test]
     fn test_app_with_norecursion() -> Result<()> {
         let temp_dir = utility_test_dir_gen()?;
-        tracing::info!("temp: {:?}", &temp_dir);
-        std::env::set_current_dir(&temp_dir.path())?;
+        tracing::info!("temp_dir: {:?}", &temp_dir);
+        let setdir = std::env::set_current_dir(&temp_dir.path())?;
+        tracing::info!("setdir: {:?}, temp_dir: {:?}", setdir, temp_dir);
 
         // run fresh
         let args = Args { regex:       "(file_.*)".to_string(),
@@ -284,8 +285,9 @@ pub mod tests {
     #[test]
     fn test_app_with_yesrecursion() -> Result<()> {
         let temp_dir = utility_test_dir_gen()?;
-        tracing::info!("temp: {:?}", &temp_dir);
-        std::env::set_current_dir(&temp_dir.path())?;
+        tracing::info!("temp_dir: {:?}", &temp_dir);
+        let setdir = std::env::set_current_dir(&temp_dir.path());
+        tracing::info!("setdir: {:?}, temp_dir: {:?}", setdir, temp_dir);
 
         // run fresh
         let args = Args { regex:       "(file.*)".to_string(),
