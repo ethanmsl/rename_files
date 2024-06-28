@@ -165,11 +165,17 @@ pub mod tests {
     /// Forces serialization within a process by running code under a global mutex.
     ///
     /// # Local Usecase:
-    /// Our app uses the 'working directory' in its logic.  (And this is the right choice
-    /// for our app.)  However working-directories are **Global** within a process.  This is
-    /// an issue backed into OS design.
-    /// This within-process serializer was added here to prevent thread safety bugs
-    /// involving manipulation of the working directory.
+    /// The 'working directory' is a global state within a process.  (This is an issue
+    /// baked into the design of all the major OSes.)  
+    /// This means that working directory manipulation and reading within tests is *not* thread-safe.
+    /// This function allows us to force in-process serialization of working directory access.
+    ///
+    /// # Design comment:
+    /// While the use of a global mutex code executor within an otherwise relatively simple
+    /// test suite may seem profligate. (e.g. vs simply running `cargo test` with `-- --test-threads 1`
+    /// or using `cargo nextest`, which process separate tests).  The intrinsic global (mutable)
+    /// resource character of the working directory should be called out (and ideally dealt with)
+    ///  in the region of the code that has to work with it.
     fn utility_with_global_mutex<F, R>(f: F) -> R
         where F: FnOnce() -> R {
         static LOCK: OnceLock<Mutex<()>> = OnceLock::new();
@@ -265,7 +271,11 @@ pub mod tests {
         }
     }
 
-    /// Simple flat, iterative change of file names
+    /// Flat, iterative change of file names.
+    ///
+    /// # Warning:
+    /// This test manipulates the working directory manipulation (which is a process-wide global state).
+    /// Code execution is controlled by a global mutex to make this function thread-safe.
     #[test]
     fn test_app_with_norecursion() -> Result<()> {
         utility_with_global_mutex(|| {
@@ -301,7 +311,11 @@ pub mod tests {
         })
     }
 
-    /// Simple flat, iterative change of file names
+    /// Recursive, iterative change of file and directory names.
+    ///
+    /// # Warning:
+    /// This test manipulates the working directory manipulation (which is a process-wide global state).
+    /// Code execution is controlled by a global mutex to make this function thread-safe.
     #[test]
     fn test_app_with_yesrecursion() -> Result<()> {
         utility_with_global_mutex(|| {
