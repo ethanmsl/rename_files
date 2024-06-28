@@ -170,7 +170,7 @@ pub mod tests {
     /// an issue backed into OS design.
     /// This within-process serializer was added here to prevent thread safety bugs
     /// involving manipulation of the working directory.
-    fn with_global_mutex<F, R>(f: F) -> R
+    fn utility_with_global_mutex<F, R>(f: F) -> R
         where F: FnOnce() -> R {
         static LOCK: OnceLock<Mutex<()>> = OnceLock::new();
         let lock = LOCK.get_or_init(|| Mutex::new(()));
@@ -268,7 +268,7 @@ pub mod tests {
     /// Simple flat, iterative change of file names
     #[test]
     fn test_app_with_norecursion() -> Result<()> {
-        with_global_mutex(|| {
+        utility_with_global_mutex(|| {
             let temp_dir = utility_test_dir_gen()?;
             std::env::set_current_dir(&temp_dir.path())?;
 
@@ -304,7 +304,7 @@ pub mod tests {
     /// Simple flat, iterative change of file names
     #[test]
     fn test_app_with_yesrecursion() -> Result<()> {
-        with_global_mutex(|| {
+        utility_with_global_mutex(|| {
             let temp_dir = utility_test_dir_gen()?;
             std::env::set_current_dir(&temp_dir.path())?;
 
