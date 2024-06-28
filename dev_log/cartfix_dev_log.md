@@ -24,3 +24,12 @@
     - [rust-lang discussion](https://users.rust-lang.org/t/env-set-current-dir-in-integration-tests-for-command-line-app/36143)
     - separate, on bringing tests *together* into a process on nextest[github](https://github.com/nextest-rs/nextest/issues/27)
     - some comments from epage on test vs nextest [blog](https://epage.github.io/blog/2023/06/iterating-on-test/)
+
+    
+- Conclusion:
+  - 'working directory' as a global within a process is an OS issue
+  - on weight, for ergonomics and simplicity using 'working directory' (implicitly via the `./` path) for the main app still feels reasonably correct.
+      - one acceptable alternative (that doesn't impact user ergonomics) is 'faking it' by just pulling out the the path of working directory and operating based on that.  (While this impacts the ability of workidn directory assumptions to be made to allow clean interaction ~post-initialization it's fair to assume we'd like to keep things constant for that period)
+      - only using nextest or only using single-threaded default test would work, but feels like just leaving trip-ups in the repo.  And, ultimately, workding directory based code, especially with mutation, is just not thread safe, and that should be dealt with and announced (ideally in the region where the relevant code lives).   
+      - writing this out: that would be a valid, slightly-positive refactor
+  - multiple test work arounds, but ultimately (to my surprise) the global mutex wrapped code felt most appropriate.  While at face value it's an ugly 'over'complication, it actually is just an honest (and direct & loud) adaptation to a core (questionable) OS desigin decision.
