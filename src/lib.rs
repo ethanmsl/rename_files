@@ -146,9 +146,13 @@ fn walkdir_build_with_depths(does_recurse: bool) -> WalkDir {
     WalkDir::new(".").contents_first(true).min_depth(1).max_depth(1)
 }
 
+/// /////////////////////////////////////////////////////////////////////////////////////// //
+/// /////////////                 TESTS - lib.rs                             ////////////// //
+/// /////////////////////////////////////////////////////////////////////////////////////// //
 #[cfg(test)]
 pub mod tests {
-    use std::fs::{self, File};
+    use std::{fs::{self, File},
+              sync::{Mutex, OnceLock}};
 
     use tempfile::TempDir;
     use test_log::test;
@@ -157,6 +161,22 @@ pub mod tests {
 
     pub type Result<T> = core::result::Result<T, Error>;
     pub type Error = Box<dyn std::error::Error>;
+
+    /// Forces serialization within a process by running code under a global mutex.
+    ///
+    /// # Local Usecase:
+    /// Our app uses the 'working directory' in its logic.  (And this is the right choice
+    /// for our app.)  However working-directories are **Global** within a process.  This is
+    /// an issue backed into OS design.
+    /// This within-process serializer was added here to prevent thread safety bugs
+    /// involving manipulation of the working directory.
+    fn with_global_mutex<F, R>(f: F) -> R
+        where F: FnOnce() -> R {
+        static LOCK: OnceLock<Mutex<()>> = OnceLock::new();
+        let lock = LOCK.get_or_init(|| Mutex::new(()));
+        let _guard = lock.lock().unwrap();
+        f()
+    }
 
     /// Generate a fixed, populated temporary directory.
     ///
@@ -248,110 +268,119 @@ pub mod tests {
     /// Simple flat, iterative change of file names
     #[test]
     fn test_app_with_norecursion() -> Result<()> {
-        let temp_dir = utility_test_dir_gen()?;
-        tracing::info!("temp_dir: {:?}", &temp_dir);
-        let setdir = std::env::set_current_dir(&temp_dir.path())?;
-        tracing::info!("setdir: {:?}, temp_dir: {:?}", setdir, temp_dir);
+        with_global_mutex(|| {
+            let temp_dir = utility_test_dir_gen()?;
+            std::env::set_current_dir(&temp_dir.path())?;
 
-        // run fresh
-        let args = Args { regex:       "(file_.*)".to_string(),
-                          replacement: Some("changed-${1}".to_string()),
-                          recurse:     false,
-                          test_run:    false, };
-        app(&args)?;
-        println!("temp: {:?}", temp_dir);
+            // run fresh
+            let args = Args { regex:       "(file_.*)".to_string(),
+                              replacement: Some("changed-${1}".to_string()),
+                              recurse:     false,
+                              test_run:    false, };
+            app(&args)?;
+            println!("temp: {:?}", temp_dir);
 
-        assert!(temp_dir.path().join("changed-file_0a.txt").exists());
-        assert!(temp_dir.path().join("changed-file_0b.txt").exists());
-        assert!(temp_dir.path().join("changed-file_0c.txt").exists());
+            assert!(temp_dir.path().join("changed-file_0a.txt").exists());
+            assert!(temp_dir.path().join("changed-file_0b.txt").exists());
+            assert!(temp_dir.path().join("changed-file_0c.txt").exists());
 
-        // run on changed
-        let args = Args { regex:       "(file_.*)".to_string(),
-                          replacement: Some("changed-${1}".to_string()),
-                          recurse:     false,
-                          test_run:    false, };
-        app(&args)?;
-        println!("temp: {:?}", temp_dir);
+            // run on changed
+            let args = Args { regex:       "(file_.*)".to_string(),
+                              replacement: Some("changed-${1}".to_string()),
+                              recurse:     false,
+                              test_run:    false, };
+            app(&args)?;
+            println!("temp: {:?}", temp_dir);
 
-        assert!(temp_dir.path().join("changed-changed-file_0a.txt").exists());
-        assert!(temp_dir.path().join("changed-changed-file_0b.txt").exists());
-        assert!(temp_dir.path().join("changed-changed-file_0c.txt").exists());
+            assert!(temp_dir.path().join("changed-changed-file_0a.txt").exists());
+            assert!(temp_dir.path().join("changed-changed-file_0b.txt").exists());
+            assert!(temp_dir.path().join("changed-changed-file_0c.txt").exists());
 
-        temp_dir.close()?;
-        Ok(())
+            temp_dir.close()?;
+            Ok(())
+        })
     }
 
     /// Simple flat, iterative change of file names
     #[test]
     fn test_app_with_yesrecursion() -> Result<()> {
-        let temp_dir = utility_test_dir_gen()?;
-        tracing::info!("temp_dir: {:?}", &temp_dir);
-        let setdir = std::env::set_current_dir(&temp_dir.path());
-        tracing::info!("setdir: {:?}, temp_dir: {:?}", setdir, temp_dir);
+        with_global_mutex(|| {
+            let temp_dir = utility_test_dir_gen()?;
+            std::env::set_current_dir(&temp_dir.path())?;
 
-        // run fresh
-        let args = Args { regex:       "(file.*)".to_string(),
-                          replacement: Some("changed-${1}".to_string()),
-                          recurse:     true,
-                          test_run:    false, };
-        app(&args)?;
-        println!("temp: {:?}", temp_dir);
+            // run fresh
+            let args = Args { regex:       "(file.*)".to_string(),
+                              replacement: Some("changed-${1}".to_string()),
+                              recurse:     true,
+                              test_run:    false, };
+            app(&args)?;
+            println!("temp: {:?}", temp_dir);
 
-        assert!(temp_dir.path().join("changed-file_0a.txt").exists());
-        assert!(temp_dir.path().join("changed-file_0b.txt").exists());
-        assert!(temp_dir.path().join("changed-file_0c.txt").exists());
+            assert!(temp_dir.path().join("changed-file_0a.txt").exists());
+            assert!(temp_dir.path().join("changed-file_0b.txt").exists());
+            assert!(temp_dir.path().join("changed-file_0c.txt").exists());
 
-        assert!(temp_dir.path().join("changed-file_0c.txt").exists());
-        assert!(temp_dir.path().join("changed-file_0c.txt").exists());
-        assert!(temp_dir.path().join("dir_1").join("changed-file_1a.txt").exists());
-        assert!(temp_dir.path().join("dir_1").join("dir_11").join("changed-file_11a.txt").exists());
-        assert!(temp_dir.path().join("dir_1").join("dir_11").join("dir_111").join("changed-file_111a.txt").exists());
+            assert!(temp_dir.path().join("changed-file_0c.txt").exists());
+            assert!(temp_dir.path().join("changed-file_0c.txt").exists());
+            assert!(temp_dir.path().join("dir_1").join("changed-file_1a.txt").exists());
+            assert!(temp_dir.path().join("dir_1").join("dir_11").join("changed-file_11a.txt").exists());
+            assert!(temp_dir.path()
+                            .join("dir_1")
+                            .join("dir_11")
+                            .join("dir_111")
+                            .join("changed-file_111a.txt")
+                            .exists());
 
-        // run against dirs
-        let args = Args { regex:       "(dir.*)".to_string(),
-                          replacement: Some("changed-${1}".to_string()),
-                          recurse:     true,
-                          test_run:    false, };
-        app(&args)?;
-        println!("temp: {:?}", temp_dir);
+            // run against dirs
+            let args = Args { regex:       "(dir.*)".to_string(),
+                              replacement: Some("changed-${1}".to_string()),
+                              recurse:     true,
+                              test_run:    false, };
+            app(&args)?;
+            println!("temp: {:?}", temp_dir);
 
-        assert!(temp_dir.path().join("changed-file_0a.txt").exists());
-        assert!(temp_dir.path().join("changed-file_0b.txt").exists());
-        assert!(temp_dir.path().join("changed-file_0c.txt").exists());
+            assert!(temp_dir.path().join("changed-file_0a.txt").exists());
+            assert!(temp_dir.path().join("changed-file_0b.txt").exists());
+            assert!(temp_dir.path().join("changed-file_0c.txt").exists());
 
-        assert!(temp_dir.path().join("changed-file_0c.txt").exists());
-        assert!(temp_dir.path().join("changed-file_0c.txt").exists());
-        assert!(temp_dir.path().join("changed-dir_1").join("changed-file_1a.txt").exists());
-        assert!(temp_dir.path().join("changed-dir_1").join("changed-dir_11").join("changed-file_11a.txt").exists());
-        assert!(temp_dir.path()
-                        .join("changed-dir_1")
-                        .join("changed-dir_11")
-                        .join("changed-dir_111")
-                        .join("changed-file_111a.txt")
-                        .exists());
+            assert!(temp_dir.path().join("changed-file_0c.txt").exists());
+            assert!(temp_dir.path().join("changed-file_0c.txt").exists());
+            assert!(temp_dir.path().join("changed-dir_1").join("changed-file_1a.txt").exists());
+            assert!(temp_dir.path().join("changed-dir_1").join("changed-dir_11").join("changed-file_11a.txt").exists());
+            assert!(temp_dir.path()
+                            .join("changed-dir_1")
+                            .join("changed-dir_11")
+                            .join("changed-dir_111")
+                            .join("changed-file_111a.txt")
+                            .exists());
 
-        // run against both
-        let args = Args { regex:       r"(\d+)".to_string(),
-                          replacement: Some("d${1}".to_string()),
-                          recurse:     true,
-                          test_run:    false, };
-        app(&args)?;
-        println!("temp: {:?}", temp_dir);
+            // run against both
+            let args = Args { regex:       r"(\d+)".to_string(),
+                              replacement: Some("d${1}".to_string()),
+                              recurse:     true,
+                              test_run:    false, };
+            app(&args)?;
+            println!("temp: {:?}", temp_dir);
 
-        assert!(temp_dir.path().join("changed-file_d0a.txt").exists());
-        assert!(temp_dir.path().join("changed-file_d0b.txt").exists());
-        assert!(temp_dir.path().join("changed-file_d0c.txt").exists());
+            assert!(temp_dir.path().join("changed-file_d0a.txt").exists());
+            assert!(temp_dir.path().join("changed-file_d0b.txt").exists());
+            assert!(temp_dir.path().join("changed-file_d0c.txt").exists());
 
-        assert!(temp_dir.path().join("changed-file_d0c.txt").exists());
-        assert!(temp_dir.path().join("changed-file_d0c.txt").exists());
-        assert!(temp_dir.path().join("changed-dir_d1").join("changed-file_d1a.txt").exists());
-        assert!(temp_dir.path().join("changed-dir_d1").join("changed-dir_d11").join("changed-file_d11a.txt").exists());
-        assert!(temp_dir.path()
-                        .join("changed-dir_d1")
-                        .join("changed-dir_d11")
-                        .join("changed-dir_d111")
-                        .join("changed-file_d111a.txt")
-                        .exists());
-        Ok(())
+            assert!(temp_dir.path().join("changed-file_d0c.txt").exists());
+            assert!(temp_dir.path().join("changed-file_d0c.txt").exists());
+            assert!(temp_dir.path().join("changed-dir_d1").join("changed-file_d1a.txt").exists());
+            assert!(temp_dir.path()
+                            .join("changed-dir_d1")
+                            .join("changed-dir_d11")
+                            .join("changed-file_d11a.txt")
+                            .exists());
+            assert!(temp_dir.path()
+                            .join("changed-dir_d1")
+                            .join("changed-dir_d11")
+                            .join("changed-dir_d111")
+                            .join("changed-file_d111a.txt")
+                            .exists());
+            Ok(())
+        })
     }
 }
