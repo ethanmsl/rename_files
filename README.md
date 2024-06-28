@@ -1,15 +1,9 @@
 # File Rename Utility
 
-> [!TIP]  
-> CI/CD: Runs normally in *parallel* with `cargo nextest` or *serially* with `cargo test`.
-> However, if run BOTH in *parallel* AND with `cargo test` then the tests attempt to use files modified by the other tests. 
-> I have yet to determine the cause of this difference between nextest and default-test behavior.  The `TempDir` created by `tempfile` should be unique each time and locally referenced.  I have yet to think of a reasonable way that this could occur, unless nextest is performing serially and the compiler is pre-computing in a way that prevents TempDir naming randomization.
-> Current CI/CD work around is forcing `cargo test` to run on a single thread. (`-- --test-threads 1`)
-
 ## Summary:
 I just needed to batch rename some files and figured I'd write a script with rust to operate using general regexes rather than use one of the (many) existing solutions.
 
-This is just a 'does what I need' command, with it's purpose being to have written it more than to use it.  But it meets my needs quite well.
+This is just a 'does what I need' command, with it's purpose being writing things often as much as to use it.  But it meets my needs quite well.
 
 Regex syntax is, of course, [Rust Regex Syntax](https://docs.rs/regex/latest/regex/#syntax).
 Replacements capture groups are (as in syntax guide) referenced with `$1` or `${1}` style.  The only exception is that only digits are expected (not named subgroups) and that `$`-following-digits followed by neither *non*-digits nor *non*-spaces nor *non*-`$` are not allowed -- bringing up a warning to encase the digit in `{}`.  (That read hard, but basically it foces you to wrap `${}`-like unless its human and machine unambiguous, and will warn if you didn't. )
