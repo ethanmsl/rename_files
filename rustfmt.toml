@@ -6,7 +6,7 @@
 version = "Two"
 unstable_features = true
 
-tab_spaces = 4  # legible groups! :)
+tab_spaces = 8 # legible groups! :)
 # hard_tabs = true
 
 ## line lengths
@@ -14,29 +14,29 @@ max_width = 120
 use_small_heuristics = "Max" # formatting based on sub-max_width lengths
 
 ## braces start at end of a line
-brace_style = "SameLineWhere"           # same line except after Where
-control_brace_style = "AlwaysSameLine" 
+brace_style = "SameLineWhere"          # same line except after Where
+control_brace_style = "AlwaysSameLine"
 
 ## sub element alignment with parent open delimiter
 imports_indent = "Visual"
 indent_style = "Visual"
 
 ## import organization
-imports_granularity = "Crate"       # group all imports for a crate together
-group_imports = "StdExternalCrate"  # category style grouping of imports (ala isort in python)
+imports_granularity = "Crate"      # group all imports for a crate together
+group_imports = "StdExternalCrate" # category style grouping of imports (ala isort in python)
 
 ## ~function related
-reorder_impl_items = true                # assoc_type & const at top of impl
-where_single_line = true                 # where on single line if few types
-type_punctuation_density = "Compressed"  # no spaces around (e.g.) TypeA+TypeB
+reorder_impl_items = true               # assoc_type & const at top of impl
+where_single_line = true                # where on single line if few types
+type_punctuation_density = "Compressed" # no spaces around (e.g.) TypeA+TypeB
 
 ## struct related
-struct_field_align_threshold = 20  # move distance to seek type alignment in struct fields
-use_field_init_shorthand = true    # let _ = some_struct {x, y, z}
+struct_field_align_threshold = 20 # move distance to seek type alignment in struct fields
+use_field_init_shorthand = true   # let _ = some_struct {x, y, z}
 
 ## various
-inline_attribute_width = 50       # distance to allow attributes on same lines a what they tag
-overflow_delimited_expr = true  # no double nesting for vertical formatted lists, etc.
+inline_attribute_width = 50    # distance to allow attributes on same lines a what they tag
+overflow_delimited_expr = true # no double nesting for vertical formatted lists, etc.
 
 # ## questionable
 # chain_width = 0        # default: 60
