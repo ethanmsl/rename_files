@@ -38,6 +38,12 @@ deploy:
     cargo doc --release
     sudo cp target/release/rename_files /usr/local/bin/rename_files
 
+# Show (dev-oriented) docs.
+docs:
+    rustup doc
+    rustup doc --std
+    cargo doc --all-features --document-private-items --open
+    
 # Linting, formatting, typo checking, etc.
 check:
     -cargo clippy
