@@ -5,7 +5,8 @@ authors = ["Ethan Skowronski-Lutz"]
 edition = "2021"
 repository = "https://github.com/ethanmsl/rename_files"
 categories = ["command-line-utilities", "file-system", "text-processing"]
-publish = false
+publish = true
+description = "CLI tool (& lib); regex search files & optionally rename. Recursive and Test flags available, but intentionally minimal."
 
 [lints.rust]
 unsafe_code = { level = "forbid" }
