@@ -3,6 +3,9 @@ name = "rename_files"
 version = "0.3.1"
 authors = ["Ethan Skowronski-Lutz"]
 edition = "2021"
+repository = "https://github.com/ethanmsl/rename_files"
+categories = ["command-line-utilities", "file-system", "text-processing"]
+publish = false
 
 [lints.rust]
 unsafe_code = { level = "forbid" }
