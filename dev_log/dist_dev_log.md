@@ -18,8 +18,13 @@ in particular:
 - Reqs to get homebrew push working
     - (I've got one homebrew available project, but would have to review the steps for it; as I do between every period of updates of it)
     - some secrets to/from github will also be needed
+    - **ANSWER**: [cargo-dist link](https://opensource.axo.dev/cargo-dist/book/installers/homebrew.html), TLDR: make a tap '<owner>/Homebrew-<repo>' and use repo-scoped (!!) github personal token to let remote CI update it.
+        - **WARNING** "repo-scoped" is not scoped to a single repo, but to repos in general.  There's currently a lack of granularity in github auth options
+          - **NOTE** "new fine-grained personal access token"s are available; will try that.
+        - note: the tap system is just a way of pointing at some specs that say how to install stuff and where it is (semi-helpful comments on [taps generally](https://docs.brew.sh/Taps))
 - Private homebrew: e.g. for an org, workable?
 - Process for specifying packages/crates (not the same thing, formally) to publish in a multi-crate workspace (e.g. cli vs egui code)
+- Changelog options (and decisions)
 
 
 ### Links
