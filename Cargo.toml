@@ -1,6 +1,6 @@
 [package]
 name = "rename_files"
-version = "0.3.2"
+version = "0.3.3"
 authors = ["Ethan Skowronski-Lutz"]
 edition = "2021"
 repository = "https://github.com/ethanmsl/rename_files"
