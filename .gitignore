@@ -6,15 +6,17 @@
 # ===================================
 # Custom GitIgnore, Boilerplate
 
-# designate a data directory that won't have its contents synced
-**/data/no_sync/*
-**/data/no-sync/*
-**/data/nosync/*
+# designate a directory that won't have its contents synced
+# typically this is part of (`data/no_sync/`)
+**/no_sync/**
+**/no-sync/**
+**/nosync/**
 
-# gitkeep -- ¡this must be after all exclusion patterns!
+# gitkeep -- ¡this must be _after _ all exclusion patterns!
 #         -- this excludes it from being caught in *glob* patterns
-#            -- `dir/*` will     allow .gitkeep to be tracked
-#            -- `dir/`  will NOT allow tracking
+# dir-exclusion: "It is not possible to re-include a file if a parent directory of that file is excluded." -gitignore docs
+#         -- `dir/*` will     allow .gitkeep to be tracked
+#         -- `dir/`  will NOT allow tracking
 !.gitkeep
 
 # ===================================
