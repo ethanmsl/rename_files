@@ -29,7 +29,7 @@ pub struct Args {
 
         /// Show replacements that would occur, but don't rename files.
         #[arg(short, long)]
-        test_run: bool,
+        preview: bool,
 }
 
 /// Application code.  (main in lib.rs)
@@ -61,7 +61,7 @@ pub fn app(args: &Args) -> Result<()> {
 #[tracing::instrument]
 fn core_process_loop(walkable_space: WalkDir, re: &Regex, args: &Args) -> Result<()> {
         let rep = &args.replacement;
-        let is_test_run = args.test_run;
+        let is_test_run = args.preview;
         let mut num_matches: u64 = 0;
 
         for entry in walkable_space {
@@ -288,7 +288,7 @@ pub mod tests {
                         let args = Args { regex:       "(file_.*)".to_string(),
                                           replacement: Some("changed-${1}".to_string()),
                                           recurse:     false,
-                                          test_run:    false, };
+                                          preview:     false, };
                         app(&args)?;
                         println!("temp: {:?}", temp_dir);
 
@@ -300,7 +300,7 @@ pub mod tests {
                         let args = Args { regex:       "(file_.*)".to_string(),
                                           replacement: Some("changed-${1}".to_string()),
                                           recurse:     false,
-                                          test_run:    false, };
+                                          preview:     false, };
                         app(&args)?;
                         println!("temp: {:?}", temp_dir);
 
@@ -328,7 +328,7 @@ pub mod tests {
                         let args = Args { regex:       "(file.*)".to_string(),
                                           replacement: Some("changed-${1}".to_string()),
                                           recurse:     true,
-                                          test_run:    false, };
+                                          preview:     false, };
                         app(&args)?;
                         println!("temp: {:?}", temp_dir);
 
@@ -351,7 +351,7 @@ pub mod tests {
                         let args = Args { regex:       "(dir.*)".to_string(),
                                           replacement: Some("changed-${1}".to_string()),
                                           recurse:     true,
-                                          test_run:    false, };
+                                          preview:     false, };
                         app(&args)?;
                         println!("temp: {:?}", temp_dir);
 
@@ -378,7 +378,7 @@ pub mod tests {
                         let args = Args { regex:       r"(\d+)".to_string(),
                                           replacement: Some("d${1}".to_string()),
                                           recurse:     true,
-                                          test_run:    false, };
+                                          preview:     false, };
                         app(&args)?;
                         println!("temp: {:?}", temp_dir);
 
