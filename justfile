@@ -48,10 +48,10 @@ deploy-remote version: check
     cargo clean
     cargo build --release
     cargo doc --release
-    git add .
-    git commit -m "release: {{version}}"
+    - git add .
+    - git commit -m "release: {{version}}"
     git tag "v{{version}}"
-    git push
+    - git push
     git push --tags
 
 # Linting, formatting, typo checking, etc.
