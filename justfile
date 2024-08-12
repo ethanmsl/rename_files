@@ -7,6 +7,7 @@ LOCAL_VAR_EXAMPLE:='yes, I am!'
 RUST_LOG:= 'debug'
 RUST_BACKTRACE:= '1'
 RUSTFLAGS:='--cfg tokio_unstable'
+TOML_VERSION:=`rg '^version = ".*"' Cargo.toml | sd '.*"(.*)".*' '$1'`
 
 # home_dir := env_var('HOME')
 local_root := justfile_directory()
@@ -32,11 +33,26 @@ init: && deps-ext
 
 # Clean, release build, deploy file to `/user/local/bin/`
 [confirm]
-deploy:
+deploy-local:
     cargo clean
     cargo build --release
     cargo doc --release
     sudo cp target/release/rename_files /usr/local/bin/rename_files
+
+# push version x.y.z; deploy if used with `dist`
+[confirm]
+deploy-remote version:
+    @ echo "TOML_VERSION: {{TOML_VERSION}}"
+    @ echo "input version: {{version}}"
+    echo {{ if TOML_VERSION == version  {"TOML version declaration matches input version."} else  {`error("version_mismatch")`} }}
+    cargo clean
+    cargo build --release
+    cargo docs -- release
+    git add .
+    git commit -m "release: {{version}}"
+    git tag "v{{version}}"
+    git push
+    git push --tags
 
 # Linting, formatting, typo checking, etc.
 check:
