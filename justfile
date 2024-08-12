@@ -33,7 +33,7 @@ init: && deps-ext
 
 # Clean, release build, deploy file to `/user/local/bin/`
 [confirm]
-deploy-local:
+deploy-local: check
     cargo clean
     cargo build --release
     cargo doc --release
@@ -41,13 +41,13 @@ deploy-local:
 
 # push version x.y.z; deploy if used with `dist`
 [confirm]
-deploy-remote version:
+deploy-remote version: check
     @ echo "TOML_VERSION: {{TOML_VERSION}}"
     @ echo "input version: {{version}}"
     echo {{ if TOML_VERSION == version  {"TOML version declaration matches input version."} else  {`error("version_mismatch")`} }}
     cargo clean
     cargo build --release
-    cargo docs -- release
+    cargo doc --release
     git add .
     git commit -m "release: {{version}}"
     git tag "v{{version}}"
@@ -56,11 +56,11 @@ deploy-remote version:
 
 # Linting, formatting, typo checking, etc.
 check:
-    -cargo clippy
-    -cargo fmt
-    -typos
-    -committed
-    -cargo nextest run --status-level=leak
+    cargo clippy
+    cargo fmt
+    typos
+    committed
+    cargo nextest run --status-level=leak
 
 # Run a specific test with output visible. (Use '' for test_name to see all tests and set log_level)
 test-view test_name="" log_level="error":
