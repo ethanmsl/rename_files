@@ -139,13 +139,16 @@ fn check_for_common_syntax_error(rep_arg: &str) -> Result<()> {
 /// Build a WalkDir object with depth limits based information passed in
 #[tracing::instrument]
 fn walkdir_build_with_depths(does_recurse: bool) -> WalkDir {
-        if does_recurse {
-                tracing::debug!("Recursable WalkDir");
-                return WalkDir::new(".").contents_first(true).min_depth(1);
+        match does_recurse {
+                true => {
+                        tracing::debug!("Recursable WalkDir");
+                        WalkDir::new(".").contents_first(true).min_depth(1)
+                }
+                false => {
+                        tracing::debug!("non-recursing (shallow) WalkDir");
+                        WalkDir::new(".").contents_first(true).min_depth(1).max_depth(1)
+                }
         }
-
-        tracing::debug!("non-recursing (shallow) WalkDir");
-        WalkDir::new(".").contents_first(true).min_depth(1).max_depth(1)
 }
 
 /// /////////////////////////////////////////////////////////////////////////////////////// //
