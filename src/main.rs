@@ -2,8 +2,8 @@
 //!
 //! # Example:
 //! ```bash
-//! clear; el; carr -- '(C|c)argo.*(\..*)' --rep '$1ogra$2' --test-run
-//! clear; el; carr -- '(C|c)argo.*(\..*)' --rep '${1}ogra$2' --test-run
+//! clear; el; carr -- '(C|c)argo.*(\..*)' --rep '$1ogra$2' --preview
+//! clear; el; carr -- '(C|c)argo.*(\..*)' --rep '${1}ogra$2' --preview
 //! ```
 
 use clap::Parser;

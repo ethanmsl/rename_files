@@ -12,7 +12,7 @@ use walkdir::WalkDir;
 
 /// Filename Find and (optionally) Replace using Rust Regex Syntax.  
 ///
-/// Files are only renamed if a `--rep(lace)` argument is provided AND `--test-run` or `-t` is *not* provided.  
+/// Files are *only* renamed if a `--rep(lace)` argument is provided AND `-p/--preview` is *not* provided.  
 #[derive(Parser, Debug)]
 #[command(version, about, long_about)]
 pub struct Args {
@@ -139,13 +139,16 @@ fn check_for_common_syntax_error(rep_arg: &str) -> Result<()> {
 /// Build a WalkDir object with depth limits based information passed in
 #[tracing::instrument]
 fn walkdir_build_with_depths(does_recurse: bool) -> WalkDir {
-        if does_recurse {
-                tracing::debug!("Recursable WalkDir");
-                return WalkDir::new(".").contents_first(true).min_depth(1);
+        match does_recurse {
+                true => {
+                        tracing::debug!("Recursable WalkDir");
+                        WalkDir::new(".").contents_first(true).min_depth(1)
+                }
+                false => {
+                        tracing::debug!("non-recursing (shallow) WalkDir");
+                        WalkDir::new(".").contents_first(true).min_depth(1).max_depth(1)
+                }
         }
-
-        tracing::debug!("non-recursing (shallow) WalkDir");
-        WalkDir::new(".").contents_first(true).min_depth(1).max_depth(1)
 }
 
 /// /////////////////////////////////////////////////////////////////////////////////////// //
