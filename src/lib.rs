@@ -12,7 +12,7 @@ use walkdir::WalkDir;
 
 /// Filename Find and (optionally) Replace using Rust Regex Syntax.  
 ///
-/// Files are only renamed if a `--rep(lace)` argument is provided AND `--test-run` or `-t` is *not* provided.  
+/// Files are *only* renamed if a `--rep(lace)` argument is provided AND `-p/--preview` is *not* provided.  
 #[derive(Parser, Debug)]
 #[command(version, about, long_about)]
 pub struct Args {
