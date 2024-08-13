@@ -27,7 +27,7 @@ _default:
         @just --list --unsorted
 
 # Initialize repository.
-init: && deps-ext
+init: && deps-ext gen-env
     cargo build    
     cargo doc
 
@@ -99,6 +99,14 @@ watch file_to_run:
 deps-ext:
     @echo "{{CYN}}List of external dependencies for this command runner and repo:"
     xsv table ext_dependencies.csv
+
+# Generate .env file from template, if .env file not present.
+gen-env:
+    if [ -f '.env' ]; then echo '`.env` exists, exiting...' && exit 1; fi
+    cp template.env .env
+    cp -n template.env .env
+    @ echo "{{BLU}}.env{{NC}} created from template. {{GRN}}Please fill in the necessary values.{{NC}}"
+    @ echo "e.g. 'nvim .env'"
 
 # ######################################################################## #
 
