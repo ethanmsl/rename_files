@@ -22,6 +22,8 @@ in particular:
         - **WARNING** "repo-scoped" is not scoped to a single repo, but to repos in general.  There's currently a lack of granularity in github auth options
           - **NOTE** "new fine-grained personal access token"s are available; will try that.
         - note: the tap system is just a way of pointing at some specs that say how to install stuff and where it is (semi-helpful comments on [taps generally](https://docs.brew.sh/Taps))
+    - Note: token can be regenerated in `Settings > Developer settings > Personal access tokens > Tokens (classic)` 
+      - and then the new code re-added to launching repo at `<repo> >Settings > Secrets & Variables > Actions`
 - Private homebrew: e.g. for an org, workable?
 - Process for specifying packages/crates (not the same thing, formally) to publish in a multi-crate workspace (e.g. cli vs egui code)
 - Changelog options (and decisions)
