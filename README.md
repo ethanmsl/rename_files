@@ -16,16 +16,13 @@ This seems less likely to cause confusion at the cost of named capture group ref
 brew install ethanmsl/rename_files/rename_files
 ```
 - via direct download:
-`https://github.com/ethanmsl/rename_files/releases/tag/v0.3.3`
+`https://github.com/ethanmsl/rename_files/releases/tag/v0.4.4`
 - from source:
 ```shell
 git clone git@github.com:ethanmsl/rename_files.git
 cd rename_files
-cargo clean
-cargo build --release
-sudo cp target/release/rename_files <destination: e.g. /usr/local/bin/rename_files>
+cargo install --path .
 ```
-
 
 ## Perf:
 
