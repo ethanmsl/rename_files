@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.3] - 2024-09-02
+
+### ⚙️ Miscellaneous Tasks
+
+- *(docs)* Add auto change log
+- Spell correct changelog
+- *(release)* Bump version
+
+### Build
+
+- Add git-cliff config
+
 ## [0.4.2] - 2024-09-02
 
 ### 🚜 Refactor
@@ -146,10 +158,10 @@ All notable changes to this project will be documented in this file.
 - Typo fixes
 - Version bump; minor wording & minor refact
 - Removed comment notes
-- Unused code reservoir
+- Unused code resevoir
 - Added a missing tracing instrumentation
 - Minor version bump
-- Removed unnecessary allow
+- Removed unecessary allow
 - Cleaning up commented test, unneeded
 - Various cleanup
 - Logging to help debug temp dir naming behavior
