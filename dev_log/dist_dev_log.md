@@ -47,9 +47,10 @@ cargo dist init
 
 ### example dist-triggering git commands
 ```shell
+TEMP_VERSION="0.2.0"
 git add .
-git commit -m "release: 0.2.0"
-git tag "v0.2.0"
+git commit -m "release: ${TEMP_VERSION}"
+git tag "v${TEMP_VERSION}"
 git push
 git push --tags
 ```
