@@ -146,10 +146,10 @@ All notable changes to this project will be documented in this file.
 - Typo fixes
 - Version bump; minor wording & minor refact
 - Removed comment notes
-- Unused code resevoir
+- Unused code reservoir
 - Added a missing tracing instrumentation
 - Minor version bump
-- Removed unecessary allow
+- Removed unnecessary allow
 - Cleaning up commented test, unneeded
 - Various cleanup
 - Logging to help debug temp dir naming behavior
