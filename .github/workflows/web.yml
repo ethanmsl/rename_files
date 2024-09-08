@@ -19,7 +19,7 @@ on:
   # completely broke oranda/mdbook. Sadly we don't provide previews (yet)!
   pull_request:
 
-  # Whenever something gets pushed to main, update the docs!
+  # Whenever something gets pushed to master, update the docs!
   # This is great for getting docs changes live without cutting a full release.
   #
   # Note that if you're using cargo-dist, this will "race" the Release workflow
@@ -90,7 +90,7 @@ jobs:
       # The other defaults work fine.
       - name: Deploy to Github Pages
         uses: JamesIves/github-pages-deploy-action@v4.4.1
-        # ONLY if we're on main (so no PRs or feature branches allowed!)
+        # ONLY if we're on master (so no PRs or feature branches allowed!)
         if: ${{ github.ref == 'refs/heads/master' }}
         with:
           branch: gh-pages
