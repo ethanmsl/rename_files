@@ -1,5 +1,7 @@
 # File Rename Utility
 
+[Alternate Documentation link.](https://ethanmsl.github.io/rename_files/)
+
 ## Summary:
 I just needed to batch rename some files and figured I'd write a script with rust to operate using general regexes rather than use one of the (many) existing solutions.
 
