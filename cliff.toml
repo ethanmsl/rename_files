@@ -56,20 +56,20 @@ commit_preprocessors = [
 ]
 # regex for parsing and grouping commits
 commit_parsers = [
-    { message = "^Feat", group = "<!-- 0 -->🚀 Features" },
-    { message = "^Fix", group = "<!-- 1 -->🐛 Bug Fixes" },
-    { message = "^Docs", group = "<!-- 3 -->📚 Documentation" },
-    { message = "^Perf", group = "<!-- 4 -->⚡ Performance" },
-    { message = "^Refact", group = "<!-- 2 -->🚜 Refactor" },
-    { message = "^Style", group = "<!-- 5 -->🎨 Styling" },
-    { message = "^Test", group = "<!-- 6 -->🧪 Testing" },
-    { message = "^Chore\\(release\\): prepare for", skip = true },
-    { message = "^Chore\\(deps.*\\)", skip = true },
-    { message = "^Chore\\(pr\\)", skip = true },
-    { message = "^Chore\\(pull\\)", skip = true },
-    { message = "^Chore|^ci", group = "<!-- 7 -->⚙️ Miscellaneous Tasks" },
+    { message = "^[fF]eat", group = "<!-- 0 -->🚀 Features" },
+    { message = "^[fF]ix", group = "<!-- 1 -->🐛 Bug Fixes" },
+    { message = "^[dD]ocs", group = "<!-- 3 -->📚 Documentation" },
+    { message = "^[pP]erf", group = "<!-- 4 -->⚡ Performance" },
+    { message = "^[rR]efact", group = "<!-- 2 -->🚜 Refactor" },
+    { message = "^[sS]tyle", group = "<!-- 5 -->🎨 Styling" },
+    { message = "^[tT]est", group = "<!-- 6 -->🧪 Testing" },
+    { message = "^[cC]hore\\(release\\): prepare for", skip = true },
+    { message = "^[cC]hore\\(deps.*\\)", skip = true },
+    { message = "^[cC]hore\\(pr\\)", skip = true },
+    { message = "^[cC]hore\\(pull\\)", skip = true },
+    { message = "^[cC]hore|^ci", group = "<!-- 7 -->⚙️ Miscellaneous Tasks" },
     { body = ".*security", group = "<!-- 8 -->🛡️ Security" },
-    { message = "^Revert", group = "<!-- 9 -->◀️ Revert" },
+    { message = "^[rR]evert", group = "<!-- 9 -->◀️ Revert" },
 ]
 # filter out the commits that are not matched by commit parsers
 filter_commits = false
