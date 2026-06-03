@@ -9,6 +9,7 @@
 use clap::Parser;
 use rename_files::{Args, app, error::Result, logging};
 
+// TODO: `Result` shouldn't be used if there's no `Error` returned .. It's okay, or a process exit
 fn main() -> Result<()> {
        logging::tracing_subscribe_boilerplate("warn");
        let args = Args::parse();
