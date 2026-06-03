@@ -88,7 +88,7 @@ fn core_process_loop(walkable_space: WalkDir, re: &Regex, args: &Args) -> Result
               num_matches += 1;
               // Guard: no replacement
               let Some(rep) = rep else {
-                     println!("Match found: {}/{}", parent.to_string_lossy().blue(), &filename.black().bold().on_green());
+                     println!("Match found: {}/{}", parent.to_string_lossy().blue(), filename.black().bold().on_green());
                      continue;
               };
               let new_filename = re.replace(filename, rep);
@@ -97,16 +97,16 @@ fn core_process_loop(walkable_space: WalkDir, re: &Regex, args: &Args) -> Result
                      println!(
                             "--test-run mapping: {}/{} ~~> {}",
                             parent.to_string_lossy().blue(),
-                            &filename.black().bold().on_green(),
-                            &new_filename.red().bold().on_blue()
+                            filename.black().bold().on_green(),
+                            new_filename.red().bold().on_blue()
                      );
                      continue;
               }
               println!(
                      "Renaming: {}/{} ~~> {}",
                      parent.to_string_lossy().blue(),
-                     &filename.black().bold().on_green(),
-                     &new_filename.red().bold().on_blue()
+                     filename.black().bold().on_green(),
+                     new_filename.red().bold().on_blue()
               );
               // std::fs::rename(entry, entry.with_file_name(new_filename.as_ref()))?;
               // TODO: check
